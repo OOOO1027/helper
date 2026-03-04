@@ -33,9 +33,7 @@ fn from_backend_error<T>(e: BackendError) -> ApiResponse<T> {
 }
 
 #[tauri::command]
-pub fn run_daily_job(
-    state: tauri::State<'_, Arc<Mutex<AppCore>>>,
-) -> ApiResponse<JobRunResult> {
+pub fn run_daily_job(state: tauri::State<'_, Arc<Mutex<AppCore>>>) -> ApiResponse<JobRunResult> {
     let app = state.lock().expect("app mutex poisoned");
     match super::run_daily_job(&app) {
         Ok(data) => ok(data),

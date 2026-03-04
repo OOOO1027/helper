@@ -7,9 +7,14 @@ import {
   getSyncLogs,
   retryDeadLetters,
   runNotionSyncOnce,
-  toUserMessage
+  toUserMessage,
 } from "../services/ipc";
-import type { SyncConfigSnapshot, SyncDailyStat, SyncLog, SyncRunSummary } from "../types/contracts";
+import type {
+  SyncConfigSnapshot,
+  SyncDailyStat,
+  SyncLog,
+  SyncRunSummary,
+} from "../types/contracts";
 import { formatTime, nowLocalIso } from "../utils/time";
 
 interface Props {
@@ -85,7 +90,7 @@ function loadFilterSnapshot(): SettingsFilterSnapshot {
         rangeDays: 7,
         logsStateFilter: "failed",
         dailyJobTypeFilter: "all",
-        dailyStatusFilter: "all"
+        dailyStatusFilter: "all",
       };
     }
     const parsed = JSON.parse(raw) as unknown;
@@ -94,12 +99,15 @@ function loadFilterSnapshot(): SettingsFilterSnapshot {
         rangeDays: 7,
         logsStateFilter: "failed",
         dailyJobTypeFilter: "all",
-        dailyStatusFilter: "all"
+        dailyStatusFilter: "all",
       };
     }
 
     const rangeDays =
-      parsed.rangeDays === 1 || parsed.rangeDays === 3 || parsed.rangeDays === 7 || parsed.rangeDays === 30
+      parsed.rangeDays === 1 ||
+      parsed.rangeDays === 3 ||
+      parsed.rangeDays === 7 ||
+      parsed.rangeDays === 30
         ? parsed.rangeDays
         : 7;
     const logsStateFilter =
@@ -131,14 +139,14 @@ function loadFilterSnapshot(): SettingsFilterSnapshot {
       rangeDays,
       logsStateFilter,
       dailyJobTypeFilter,
-      dailyStatusFilter
+      dailyStatusFilter,
     };
   } catch {
     return {
       rangeDays: 7,
       logsStateFilter: "failed",
       dailyJobTypeFilter: "all",
-      dailyStatusFilter: "all"
+      dailyStatusFilter: "all",
     };
   }
 }
@@ -162,8 +170,8 @@ function loadLastSyncSnapshot(): LastSyncSnapshot | null {
         succeeded: asNumber(summary.succeeded),
         failed: asNumber(summary.failed),
         requeued: asNumber(summary.requeued),
-        dead_lettered: asNumber(summary.dead_lettered)
-      }
+        dead_lettered: asNumber(summary.dead_lettered),
+      },
     };
   } catch {
     return null;
@@ -191,7 +199,7 @@ function loadLatestImportSnapshot(): LatestImportSnapshot | null {
       status: failed === 0 ? "success" : asNumber(summary.persisted) > 0 ? "partial" : "failed",
       parsedOk: asNumber(summary.parsed_ok),
       persisted: asNumber(summary.persisted),
-      failed
+      failed,
     };
   } catch {
     return null;
@@ -306,10 +314,12 @@ export function SettingsLogsPage({ onNotify }: Props) {
   const [syncing, setSyncing] = useState(false);
   const [syncLimitInput, setSyncLimitInput] = useState("50");
   const [lastSyncSummary, setLastSyncSummary] = useState<SyncRunSummary | null>(null);
-  const [lastSyncSnapshot, setLastSyncSnapshot] = useState<LastSyncSnapshot | null>(
-    () => loadLastSyncSnapshot()
+  const [lastSyncSnapshot, setLastSyncSnapshot] = useState<LastSyncSnapshot | null>(() =>
+    loadLastSyncSnapshot()
   );
-  const [latestImportSnapshot] = useState<LatestImportSnapshot | null>(() => loadLatestImportSnapshot());
+  const [latestImportSnapshot] = useState<LatestImportSnapshot | null>(() =>
+    loadLatestImportSnapshot()
+  );
   const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
   const [lastActionKind, setLastActionKind] = useState<ActionKind>(null);
   const [deadLetterIds, setDeadLetterIds] = useState("");
@@ -352,7 +362,10 @@ export function SettingsLogsPage({ onNotify }: Props) {
       ).length,
     [logs]
   );
-  const deadLetterIdCount = useMemo(() => parseDeadLetterInput(deadLetterIds).length, [deadLetterIds]);
+  const deadLetterIdCount = useMemo(
+    () => parseDeadLetterInput(deadLetterIds).length,
+    [deadLetterIds]
+  );
   const latestSyncHeadline = useMemo(() => {
     if (lastSyncSummary) {
       const failed = lastSyncSummary.failed;
@@ -360,13 +373,13 @@ export function SettingsLogsPage({ onNotify }: Props) {
         return {
           status: "success" as const,
           text: `成功 ${lastSyncSummary.succeeded} / 失败 0`,
-          at: nowLocalIso()
+          at: nowLocalIso(),
         };
       }
       return {
         status: "warning" as const,
         text: `成功 ${lastSyncSummary.succeeded} / 失败 ${failed}`,
-        at: nowLocalIso()
+        at: nowLocalIso(),
       };
     }
     if (lastSyncSnapshot) {
@@ -374,7 +387,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       return {
         status: failed === 0 ? ("success" as const) : ("warning" as const),
         text: `成功 ${lastSyncSnapshot.summary.succeeded} / 失败 ${failed}`,
-        at: lastSyncSnapshot.at
+        at: lastSyncSnapshot.at,
       };
     }
     const latestLog = logs[0];
@@ -389,7 +402,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
             ? ("warning" as const)
             : ("neutral" as const),
       text: `最近状态：${formatLogState(latestLog.state)}`,
-      at: latestLog.created_at
+      at: latestLog.created_at,
     };
   }, [lastSyncSnapshot, lastSyncSummary, logs]);
   const dailyOverview = useMemo(() => {
@@ -420,7 +433,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       avgFailPerRun: totalRuns > 0 ? weightedAvgFailCount / totalRuns : 0,
       dayCount: daySet.size,
       jobTypeCount: jobTypeCounter.size,
-      topJobType: topJobTypeEntry ? formatJobType(topJobTypeEntry[0]) : "-"
+      topJobType: topJobTypeEntry ? formatJobType(topJobTypeEntry[0]) : "-",
     };
   }, [dailyStats]);
   const syncMode = syncConfig?.mode ?? "unknown";
@@ -429,11 +442,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
   const databaseIdMissing = syncMode === "database" && syncConfig?.database_id_configured === false;
   const tokenMissing = syncConfig?.token_configured === false;
 
-  const notifyAction = (
-    level: "success" | "warning" | "error",
-    action: string,
-    detail: string
-  ) => {
+  const notifyAction = (level: "success" | "warning" | "error", action: string, detail: string) => {
     onNotify({ level, message: `${action}：${detail}` });
   };
 
@@ -464,15 +473,19 @@ export function SettingsLogsPage({ onNotify }: Props) {
     setStatsLoading(true);
     const [logsResult, dailyStatsResult] = await Promise.allSettled([
       getSyncLogs(range, { page: logsPage, page_size: logsPageSize }),
-      getSyncDailyStats(range, { page: statsPage, page_size: statsPageSize }, {
-        job_type: dailyJobTypeFilter === "all" ? undefined : dailyJobTypeFilter,
-        status:
-          dailyStatusOverride && dailyStatusOverride.trim().length > 0
-            ? dailyStatusOverride.trim()
-            : dailyStatusFilter === "all"
-              ? undefined
-              : dailyStatusFilter
-      })
+      getSyncDailyStats(
+        range,
+        { page: statsPage, page_size: statsPageSize },
+        {
+          job_type: dailyJobTypeFilter === "all" ? undefined : dailyJobTypeFilter,
+          status:
+            dailyStatusOverride && dailyStatusOverride.trim().length > 0
+              ? dailyStatusOverride.trim()
+              : dailyStatusFilter === "all"
+                ? undefined
+                : dailyStatusFilter,
+        }
+      ),
     ]);
 
     if (requestSeq !== requestSeqRef.current) {
@@ -506,7 +519,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
     logsPageSize,
     rangeDays,
     statsPage,
-    statsPageSize
+    statsPageSize,
   ]);
 
   useEffect(() => {
@@ -533,7 +546,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       rangeDays,
       logsStateFilter,
       dailyJobTypeFilter,
-      dailyStatusFilter
+      dailyStatusFilter,
     };
     localStorage.setItem(SETTINGS_FILTERS_KEY, JSON.stringify(snapshot));
   }, [dailyJobTypeFilter, dailyStatusFilter, logsStateFilter, rangeDays]);
@@ -550,7 +563,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "warning",
         message: "未获取到同步配置状态，已拦截本次同步。",
-        nextStep: "下一步：先点击“刷新配置状态”确认配置，再执行“立即同步一次”。"
+        nextStep: "下一步：先点击“刷新配置状态”确认配置，再执行“立即同步一次”。",
       });
       notifyAction("warning", "立即同步", "同步配置未就绪，已阻止请求");
       return;
@@ -559,7 +572,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "warning",
         message: "同步模式配置无效，已拦截本次同步。",
-        nextStep: "下一步：将 NOTION_SYNC_MODE 设置为 page_tree 或 database 后重试。"
+        nextStep: "下一步：将 NOTION_SYNC_MODE 设置为 page_tree 或 database 后重试。",
       });
       notifyAction("warning", "立即同步", "同步模式配置无效");
       return;
@@ -568,7 +581,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "warning",
         message: "当前是页面树模式，但未配置根页面，已拦截本次同步。",
-        nextStep: "下一步：在部署配置中补齐根页面 ID，再回到这里重试。"
+        nextStep: "下一步：在部署配置中补齐根页面 ID，再回到这里重试。",
       });
       notifyAction("warning", "立即同步", "页面树模式缺少根页面配置");
       return;
@@ -577,7 +590,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "warning",
         message: "当前是数据库模式，但未配置数据库 ID，已拦截本次同步。",
-        nextStep: "下一步：在部署配置中补齐数据库 ID，再回到这里重试。"
+        nextStep: "下一步：在部署配置中补齐数据库 ID，再回到这里重试。",
       });
       notifyAction("warning", "立即同步", "数据库模式缺少数据库 ID 配置");
       return;
@@ -586,7 +599,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "warning",
         message: "未检测到 Notion 凭证，已拦截本次同步。",
-        nextStep: "下一步：先配置 Notion 访问凭证，再执行“立即同步一次”。"
+        nextStep: "下一步：先配置 Notion 访问凭证，再执行“立即同步一次”。",
       });
       notifyAction("warning", "立即同步", "缺少 Notion 凭证");
       return;
@@ -598,7 +611,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "warning",
         message: "同步上限无效，请输入大于 0 的数字。",
-        nextStep: "下一步：修正同步上限后，重新点击“立即同步一次”。"
+        nextStep: "下一步：修正同步上限后，重新点击“立即同步一次”。",
       });
       notifyAction("warning", "立即同步", "请输入大于 0 的处理上限");
       return;
@@ -612,7 +625,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setLastSyncSummary(summary);
       const snapshot: LastSyncSnapshot = {
         at: nowLocalIso(),
-        summary
+        summary,
       };
       setLastSyncSnapshot(snapshot);
       localStorage.setItem(LAST_SYNC_SUMMARY_KEY, JSON.stringify(snapshot));
@@ -623,7 +636,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
         nextStep:
           summary.failed > 0
             ? "下一步：点击“查看失败日志”定位失败项，必要时执行失败回放。"
-            : "下一步：前往日志确认最新记录，继续下一轮导入或审核。"
+            : "下一步：前往日志确认最新记录，继续下一轮导入或审核。",
       });
       notifyAction(level, "立即同步", `成功 ${summary.succeeded} / 失败 ${summary.failed}`);
     } catch (e) {
@@ -631,7 +644,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "error",
         message,
-        nextStep: "下一步：检查 Notion 连接与本地存储后重试；必要时在日志中筛选失败项。"
+        nextStep: "下一步：检查 Notion 连接与本地存储后重试；必要时在日志中筛选失败项。",
       });
       notifyAction("error", "立即同步", message);
     } finally {
@@ -648,7 +661,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "warning",
         message: "未输入可回放 ID。",
-        nextStep: "下一步：先在失败日志中复制 ID，再回到这里执行回放。"
+        nextStep: "下一步：先在失败日志中复制 ID，再回到这里执行回放。",
       });
       notifyAction("warning", "回放 dead letters", "请先输入需要回放的失败项 ID");
       return;
@@ -669,7 +682,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
         nextStep:
           result.requeued === result.requested
             ? "下一步：点击“刷新日志”确认状态变化。"
-            : "下一步：检查输入 ID 是否来自失败日志，再次回放未成功项。"
+            : "下一步：检查输入 ID 是否来自失败日志，再次回放未成功项。",
       });
       setDeadLetterIds("");
     } catch (e) {
@@ -677,7 +690,7 @@ export function SettingsLogsPage({ onNotify }: Props) {
       setActionFeedback({
         level: "error",
         message,
-        nextStep: "下一步：确认失败项 ID 来自日志失败记录，修正后再回放。"
+        nextStep: "下一步：确认失败项 ID 来自日志失败记录，修正后再回放。",
       });
       notifyAction("error", "回放 dead letters", message);
     } finally {
@@ -831,7 +844,9 @@ export function SettingsLogsPage({ onNotify }: Props) {
           </div>
           <div className="kv-row">
             <span>timezone</span>
-            <code>{syncConfig?.timezone && syncConfig.timezone.length > 0 ? syncConfig.timezone : "-"}</code>
+            <code>
+              {syncConfig?.timezone && syncConfig.timezone.length > 0 ? syncConfig.timezone : "-"}
+            </code>
           </div>
           <div className="kv-row">
             <span>category growth limit</span>
@@ -846,7 +861,9 @@ export function SettingsLogsPage({ onNotify }: Props) {
           {syncConfig?.source === "ipc" && syncModeUnknown && (
             <div className="state-panel warning" role="status" aria-live="polite">
               当前同步模式配置无效，手动同步会被拦截。
-              <small>下一步：将 NOTION_SYNC_MODE 设为 page_tree 或 database，再点击“刷新配置状态”。</small>
+              <small>
+                下一步：将 NOTION_SYNC_MODE 设为 page_tree 或 database，再点击“刷新配置状态”。
+              </small>
             </div>
           )}
           {rootPageMissing && (
@@ -868,7 +885,11 @@ export function SettingsLogsPage({ onNotify }: Props) {
             </div>
           )}
           <div className="inline-actions">
-            <button type="button" onClick={() => void loadSyncConfig()} disabled={actionBusy || syncConfigLoading}>
+            <button
+              type="button"
+              onClick={() => void loadSyncConfig()}
+              disabled={actionBusy || syncConfigLoading}
+            >
               {syncConfigLoading ? "刷新中..." : "刷新配置状态"}
             </button>
           </div>
@@ -918,7 +939,9 @@ export function SettingsLogsPage({ onNotify }: Props) {
           </div>
           {actionBusy && (
             <div className="state-panel" role="status" aria-live="polite">
-              {syncing ? "正在执行手动同步，请等待结果返回。" : "正在执行失败回放，请等待结果返回。"}
+              {syncing
+                ? "正在执行手动同步，请等待结果返回。"
+                : "正在执行失败回放，请等待结果返回。"}
             </div>
           )}
           {lastSyncSummary && (
@@ -958,7 +981,9 @@ export function SettingsLogsPage({ onNotify }: Props) {
             >
               {retryingDeadLetters ? "回放中..." : "回放失败项"}
             </button>
-            <span className="hint">已填入 {deadLetterIdCount} 个 ID，不会覆盖历史记录，仅重排待处理队列。</span>
+            <span className="hint">
+              已填入 {deadLetterIdCount} 个 ID，不会覆盖历史记录，仅重排待处理队列。
+            </span>
           </div>
         </article>
       </div>
@@ -974,7 +999,12 @@ export function SettingsLogsPage({ onNotify }: Props) {
           {actionFeedback.nextStep && <small>{actionFeedback.nextStep}</small>}
           <div className="inline-actions">
             {lastActionKind === "sync" && (
-              <button type="button" onClick={onManualSync} disabled={actionBusy} data-testid="settings-retry-sync">
+              <button
+                type="button"
+                onClick={onManualSync}
+                disabled={actionBusy}
+                data-testid="settings-retry-sync"
+              >
                 重试同步
               </button>
             )}
@@ -1025,7 +1055,13 @@ export function SettingsLogsPage({ onNotify }: Props) {
             value={logsStateFilter}
             onChange={(event) =>
               setLogsStateFilter(
-                event.target.value as "all" | "started" | "success" | "failed" | "partial" | "skipped"
+                event.target.value as
+                  | "all"
+                  | "started"
+                  | "success"
+                  | "failed"
+                  | "partial"
+                  | "skipped"
               )
             }
             disabled={actionBusy}
@@ -1109,7 +1145,9 @@ export function SettingsLogsPage({ onNotify }: Props) {
                   <tr key={log.id}>
                     <td>{log.id.slice(0, 8)}</td>
                     <td>
-                      <span className={`tag ${logStateTone(log.state)}`}>{formatLogState(log.state)}</span>
+                      <span className={`tag ${logStateTone(log.state)}`}>
+                        {formatLogState(log.state)}
+                      </span>
                     </td>
                     <td>{log.error_code ?? "-"}</td>
                     <td>{formatTime(log.created_at)}</td>
@@ -1168,12 +1206,12 @@ export function SettingsLogsPage({ onNotify }: Props) {
         <div className="filter-bar">
           <select
             value={dailyJobTypeFilter}
-            onChange={(event) =>
-              {
-                setDailyJobTypeFilter(event.target.value as "all" | "notion_sync_once" | "notion_smoke");
-                setStatsPage(1);
-              }
-            }
+            onChange={(event) => {
+              setDailyJobTypeFilter(
+                event.target.value as "all" | "notion_sync_once" | "notion_smoke"
+              );
+              setStatsPage(1);
+            }}
             disabled={actionBusy}
           >
             <option value="all">任务类型：全部</option>
@@ -1182,15 +1220,19 @@ export function SettingsLogsPage({ onNotify }: Props) {
           </select>
           <select
             value={dailyStatusFilter}
-            onChange={(event) =>
-              {
-                setDailyStatusFilter(
-                  event.target.value as "all" | "started" | "success" | "failed" | "partial" | "skipped"
-                );
-                setDailyStatusOverride(null);
-                setStatsPage(1);
-              }
-            }
+            onChange={(event) => {
+              setDailyStatusFilter(
+                event.target.value as
+                  | "all"
+                  | "started"
+                  | "success"
+                  | "failed"
+                  | "partial"
+                  | "skipped"
+              );
+              setDailyStatusOverride(null);
+              setStatsPage(1);
+            }}
             disabled={actionBusy}
           >
             <option value="all">运行状态：全部</option>

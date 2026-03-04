@@ -28,7 +28,7 @@ export function SyncMetricsCards({
   latestSyncHeadline,
   failedCount,
   replayableCandidateCount,
-  dailyOverview
+  dailyOverview,
 }: Props) {
   return (
     <>

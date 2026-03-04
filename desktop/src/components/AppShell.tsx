@@ -19,16 +19,8 @@ interface Props {
 }
 
 export function AppShell(props: Props) {
-  const {
-    navItems,
-    activeKey,
-    activeLabel,
-    onChange,
-    topBar,
-    children,
-    notices,
-    dismissNotice
-  } = props;
+  const { navItems, activeKey, activeLabel, onChange, topBar, children, notices, dismissNotice } =
+    props;
 
   return (
     <div className="app-shell">

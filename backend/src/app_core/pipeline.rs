@@ -315,7 +315,11 @@ impl AppCore {
                 analyzed.value_score,
                 analyzed.quality_score,
                 if review_required { 1 } else { 0 },
-                if review_required { "pending" } else { "skipped" },
+                if review_required {
+                    "pending"
+                } else {
+                    "skipped"
+                },
                 final_status,
                 &now
             ],

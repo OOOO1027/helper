@@ -1,6 +1,6 @@
 import { RemoteState } from "../../components/RemoteState";
 import type { SyncDailyStat } from "../../types/contracts";
-import { formatJobType, formatLogState } from "./settingsHelpers";
+import { formatJobType } from "./settingsHelpers";
 import type { DailyJobTypeFilter, LogStateFilter } from "./settingsHelpers";
 
 interface Props {
@@ -44,7 +44,7 @@ export function DailyStatsPanel({
   onApplyCustomStatus,
   onPrevPage,
   onNextPage,
-  onRefresh
+  onRefresh,
 }: Props) {
   return (
     <article className="panel-card">
@@ -64,9 +64,7 @@ export function DailyStatsPanel({
         <select
           value={dailyStatusFilter}
           onChange={(event) => {
-            onStatusFilterChange(
-              event.target.value as LogStateFilter
-            );
+            onStatusFilterChange(event.target.value as LogStateFilter);
           }}
           disabled={actionBusy}
         >
@@ -92,9 +90,7 @@ export function DailyStatsPanel({
         >
           应用状态
         </button>
-        {dailyStatusOverride && (
-          <span className="hint">当前自定义状态：{dailyStatusOverride}</span>
-        )}
+        {dailyStatusOverride && <span className="hint">当前自定义状态：{dailyStatusOverride}</span>}
         <span className="hint">任务类型/状态筛选由后端聚合接口执行</span>
       </div>
       <RemoteState
@@ -103,8 +99,8 @@ export function DailyStatsPanel({
         empty={dailyStats.length === 0}
         loadingText="日统计加载中..."
         emptyText="当前筛选条件下暂无日统计。可切换任务类型或扩大时间范围后重试。"
-        errorNextStep="下一步：点击"重试加载统计"；若仍失败，请先刷新日志确认同步记录是否存在。"
-        emptyNextStep="下一步：切换任务类型为"全部"并放宽时间范围，再刷新统计。"
+        errorNextStep="下一步：点击「重试加载统计」；若仍失败，请先刷新日志确认同步记录是否存在。"
+        emptyNextStep="下一步：切换任务类型为「全部」并放宽时间范围，再刷新统计。"
         onRetry={onRefresh}
         retryLabel="重试加载统计"
       >

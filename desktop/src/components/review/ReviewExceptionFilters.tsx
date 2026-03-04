@@ -15,7 +15,7 @@ export function ReviewExceptionFilters({
   reasonFilter,
   onReasonFilterChange,
   priorityFilter,
-  onPriorityFilterChange
+  onPriorityFilterChange,
 }: Props) {
   if (!enabled) {
     return null;

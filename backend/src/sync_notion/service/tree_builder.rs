@@ -3,21 +3,21 @@ use rusqlite::{params, Connection, OptionalExtension};
 use serde_json::{json, Value};
 use std::collections::HashSet;
 
+use super::ai_content::{build_structured_content, refresh_budget_guard_state};
+use super::render::{
+    normalize_node_key, paragraph_block, render_images_block, render_key_points_block,
+    render_source_link_block, render_summary_block, render_tags_block,
+};
+use super::state_persistence::persist_structured_snapshot;
+use super::{
+    parse_published_at, render_status_metadata, stable_hash, NotionTreeConfig, PendingSyncRow,
+    StructuredContentState, TreeItemNode,
+};
 use crate::sync_notion::notion_api::NotionTreeClient;
 use crate::sync_notion::tree::{
     clean_item_title, normalize_key, route_category_with_growth_limit, week_key_and_title,
 };
 use crate::{BackendError, Result};
-use super::{
-    stable_hash, parse_published_at, render_status_metadata,
-    NotionTreeConfig, PendingSyncRow, StructuredContentState, TreeItemNode,
-};
-use super::render::{
-    normalize_node_key, paragraph_block, render_images_block, render_key_points_block,
-    render_source_link_block, render_summary_block, render_tags_block,
-};
-use super::ai_content::{build_structured_content, refresh_budget_guard_state};
-use super::state_persistence::persist_structured_snapshot;
 
 pub(super) async fn load_known_custom_categories<C: NotionTreeClient>(
     conn: &Connection,
@@ -232,7 +232,9 @@ pub(super) async fn upsert_tree_item<C: NotionTreeClient>(
                 client
                     .update_paragraph_block(block_id, &images_block_text)
                     .await
-                    .map_err(|e| BackendError::Internal(format!("update images block failed: {e}")))?;
+                    .map_err(|e| {
+                        BackendError::Internal(format!("update images block failed: {e}"))
+                    })?;
             }
         }
 
@@ -326,12 +328,9 @@ pub(super) async fn upsert_tree_item<C: NotionTreeClient>(
             blocks.push(paragraph_block(&images_block_text));
             Some(idx)
         };
-        let block_ids = client
-            .append_blocks(&page_id, &blocks)
-            .await
-            .map_err(|e| {
-                BackendError::Internal(format!("append notion item blocks failed: {e}"))
-            })?;
+        let block_ids = client.append_blocks(&page_id, &blocks).await.map_err(|e| {
+            BackendError::Internal(format!("append notion item blocks failed: {e}"))
+        })?;
         (
             format!("ntn_item_{}", stable_hash(&row.normalized_item_id)),
             page_id,

@@ -12,11 +12,11 @@ use crate::{BackendError, Result};
 
 mod render;
 
-mod state_persistence;
-mod quality_eval;
-mod xhs_scraper;
 mod ai_content;
+mod quality_eval;
+mod state_persistence;
 mod tree_builder;
+mod xhs_scraper;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SyncRunSummary {
@@ -548,9 +548,8 @@ fn load_tree_config(conn: &Connection) -> Result<NotionTreeConfig> {
     .map(|v| v.trim().to_string())
     .filter(|v| !v.is_empty())
     .collect::<Vec<_>>();
-    let timezone =
-        config::env_or_db_string(conn, "NOTION_TREE_TIMEZONE", "notion.tree.timezone")?
-            .unwrap_or_else(|| "Asia/Shanghai".to_string());
+    let timezone = config::env_or_db_string(conn, "NOTION_TREE_TIMEZONE", "notion.tree.timezone")?
+        .unwrap_or_else(|| "Asia/Shanghai".to_string());
     let fixed_first_level_categories = config::env_bool("NOTION_TREE_FIXED_FIRST_LEVEL", true);
     // Fail fast on invalid timezone instead of silently falling back.
     week_key_and_title(Utc::now(), &timezone).map_err(BackendError::Validation)?;
@@ -717,8 +716,8 @@ fn parse_dt(v: &str) -> Option<NaiveDateTime> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::ai_content::model_skip_reason;
+    use super::*;
 
     fn test_content_state() -> StructuredContentState {
         StructuredContentState {

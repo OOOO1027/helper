@@ -13,8 +13,8 @@ use utils::{
     should_fallback_to_profile_scrape, stable_hash, within_window,
 };
 
-mod cookie_api;
 mod chrome_inject;
+mod cookie_api;
 mod profile_scraper;
 mod utils;
 
@@ -207,11 +207,7 @@ impl XhsCollector {
         Ok(())
     }
 
-    async fn fetch_page_json(
-        &self,
-        path: &str,
-        params: &HashMap<String, String>,
-    ) -> Result<Value> {
+    async fn fetch_page_json(&self, path: &str, params: &HashMap<String, String>) -> Result<Value> {
         if let Some(cookie) = self.resolve_cookie() {
             match self.fetch_with_cookie(path, params, &cookie).await {
                 Ok(payload) => Ok(payload),

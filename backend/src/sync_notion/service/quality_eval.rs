@@ -9,7 +9,8 @@ pub(super) fn evaluate_structured_quality(
 ) -> (f64, String, Vec<String>) {
     let mut score = 0.0;
     let mut degraded = Vec::<String>::new();
-    let source_text = normalize_text_output(&format!("{}\n{}", row.content_raw, row.summary), 6_000);
+    let source_text =
+        normalize_text_output(&format!("{}\n{}", row.content_raw, row.summary), 6_000);
     let summary_clean = summary.trim();
 
     if !summary_clean.is_empty() && summary_clean != "-" {
@@ -90,7 +91,13 @@ pub(super) fn evaluate_structured_quality(
     score += 5.0;
     if !matches!(
         route_reason,
-        None | Some("low_confidence" | "growth_limit_exceeded" | "keyword_match" | "fallback_default" | "fallback_tag_unmapped")
+        None | Some(
+            "low_confidence"
+                | "growth_limit_exceeded"
+                | "keyword_match"
+                | "fallback_default"
+                | "fallback_tag_unmapped"
+        )
     ) {
         degraded.push("route_reason".to_string());
     }
@@ -98,10 +105,7 @@ pub(super) fn evaluate_structured_quality(
 
     dedupe_string_vec(&mut degraded);
     let mut clamped = score.clamp(0.0, 100.0);
-    if clamped < 55.0
-        && !summary_clean.is_empty()
-        && source_text.chars().count() < 200
-    {
+    if clamped < 55.0 && !summary_clean.is_empty() && source_text.chars().count() < 200 {
         clamped = 60.0;
         degraded.push("short_source_context".to_string());
     }

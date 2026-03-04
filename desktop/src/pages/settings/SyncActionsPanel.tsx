@@ -31,7 +31,7 @@ export function SyncActionsPanel({
   onClearDeadLetterIds,
   onRetryDeadLetters,
   retryingDeadLetters,
-  deadLetterIdCount
+  deadLetterIdCount,
 }: Props) {
   return (
     <div className="settings-grid">
@@ -117,7 +117,9 @@ export function SyncActionsPanel({
           >
             {retryingDeadLetters ? "回放中..." : "回放失败项"}
           </button>
-          <span className="hint">已填入 {deadLetterIdCount} 个 ID，不会覆盖历史记录，仅重排待处理队列。</span>
+          <span className="hint">
+            已填入 {deadLetterIdCount} 个 ID，不会覆盖历史记录，仅重排待处理队列。
+          </span>
         </div>
       </article>
     </div>

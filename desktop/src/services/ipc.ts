@@ -25,7 +25,7 @@ import type {
   SyncConfigSnapshot,
   SyncDailyStat,
   SyncLog,
-  UpdateReviewItemReq
+  UpdateReviewItemReq,
 } from "../types/contracts";
 import { toReviewItem } from "./adapters";
 
@@ -67,10 +67,7 @@ export function toUserMessage(error: unknown, fallback: string): string {
     if (error.message.includes("NOTION_DATABASE_ID is required")) {
       return "Notion 数据库 ID 缺失。下一步：在 database 模式下配置 NOTION_DATABASE_ID 后重试。";
     }
-    if (
-      error.message.includes("NOTION_DATABASE_ID") ||
-      error.message.includes("NOTION_TOKEN")
-    ) {
+    if (error.message.includes("NOTION_DATABASE_ID") || error.message.includes("NOTION_TOKEN")) {
       return "Notion 同步配置不完整。下一步：补齐必要配置后重试。";
     }
     if (
@@ -189,9 +186,9 @@ function localMockPaged(page: PageReq): Paged<ReviewItem> {
         reason: "C < 0.78 OR ValueScore >= 0.85",
         state: "pending",
         publishState: "pending",
-        tab: "pending"
-      }
-    ]
+        tab: "pending",
+      },
+    ],
   };
 }
 
@@ -202,7 +199,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
       pending_review: 6,
       classification_accuracy: 0.81,
       summary_usability: 0.76,
-      budget_usage_ratio: 0.32
+      budget_usage_ratio: 0.32,
     };
   }
   return invokeWithEnvelope<DashboardMetrics>("get_dashboard_metrics");
@@ -215,7 +212,7 @@ export async function getCollectionInsight(): Promise<CollectionInsight> {
       today_total: 25,
       sources: [
         { source: "xhs", count: 20 },
-        { source: "wechat", count: 5 }
+        { source: "wechat", count: 5 },
       ],
       review_pending: 6,
       review_done: 10,
@@ -226,7 +223,7 @@ export async function getCollectionInsight(): Promise<CollectionInsight> {
       sync_failed: 1,
       sync_retry: 0,
       sync_not_started: 3,
-      recent_items: []
+      recent_items: [],
     };
   }
   return invokeWithEnvelope<CollectionInsight>("get_collection_insight");
@@ -237,7 +234,7 @@ export async function getBudgetStatus(): Promise<BudgetStatus> {
     return {
       month: "2026-02",
       limit_cny: 100,
-      used_cny: 32
+      used_cny: 32,
     };
   }
   return invokeWithEnvelope<BudgetStatus>("get_budget_status");
@@ -261,18 +258,18 @@ export async function getAiUsageMonthlySummary(month?: string): Promise<AiUsageM
           calls: 240,
           tokens_in: 520000,
           tokens_out: 86000,
-          cost_cny: 18.6
-        }
+          cost_cny: 18.6,
+        },
       ],
       daily: [
         { day: "2026-02-26", calls: 42, tokens_in: 91000, tokens_out: 15000, cost_cny: 3.2 },
         { day: "2026-02-25", calls: 37, tokens_in: 82000, tokens_out: 14000, cost_cny: 2.9 },
-        { day: "2026-02-24", calls: 33, tokens_in: 74000, tokens_out: 12000, cost_cny: 2.5 }
-      ]
+        { day: "2026-02-24", calls: 33, tokens_in: 74000, tokens_out: 12000, cost_cny: 2.5 },
+      ],
     };
   }
   return invokeWithEnvelope<AiUsageMonthlySummary>("get_ai_usage_monthly_summary", {
-    req: { month }
+    req: { month },
   });
 }
 
@@ -286,11 +283,11 @@ export async function importWechatAndPersist(paths: string[]): Promise<ImportPer
       duplicates: 0,
       parse_failed: 0,
       persisted: total,
-      persist_failed: 0
+      persist_failed: 0,
     };
   }
   return invokeWithEnvelope<ImportPersistSummary>("import_wechat_and_persist", {
-    req: { paths }
+    req: { paths },
   });
 }
 
@@ -302,7 +299,7 @@ export async function pickWechatFiles(): Promise<string[]> {
   const { open } = await import("@tauri-apps/plugin-dialog");
   const pickerOptions = {
     multiple: true,
-    title: "选择微信导出文件"
+    title: "选择微信导出文件",
   } as const;
   const defaultPath = await resolveWechatPickerDefaultPath();
   const selected = await (async () => {
@@ -312,7 +309,7 @@ export async function pickWechatFiles(): Promise<string[]> {
     try {
       return await open({
         ...pickerOptions,
-        defaultPath
+        defaultPath,
       });
     } catch {
       return open(pickerOptions);
@@ -339,11 +336,11 @@ export async function getReviewItems(req: GetReviewItemsReq): Promise<Paged<Revi
     return localMockPaged(req.page);
   }
   const data = await invokeWithEnvelope<Paged<BackendReviewItem>>("get_review_items", {
-    req
+    req,
   });
   return {
     ...data,
-    items: data.items.map(toReviewItem)
+    items: data.items.map(toReviewItem),
   };
 }
 
@@ -355,7 +352,7 @@ export async function getReviewQueue(req: GetReviewQueueReq): Promise<Paged<Revi
     const data = await invokeWithEnvelope<Paged<BackendReviewItem>>("get_review_queue", { req });
     return {
       ...data,
-      items: data.items.map(toReviewItem)
+      items: data.items.map(toReviewItem),
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -381,11 +378,11 @@ export async function updateReviewItem(req: UpdateReviewItemReq): Promise<Review
       reason: req.patch.note ?? "manual update",
       state: req.patch.state ?? "done",
       publishState: "pending",
-      tab: "done"
+      tab: "done",
     };
   }
   const data = await invokeWithEnvelope<BackendReviewItem>("update_review_item", {
-    req
+    req,
   });
   return toReviewItem(data);
 }
@@ -395,7 +392,7 @@ export async function retryFailedItems(ids: string[]): Promise<RetryResult> {
     return {
       requested: ids.length,
       requeued: ids.length,
-      ignored: 0
+      ignored: 0,
     };
   }
   return invokeWithEnvelope<RetryResult>("retry_failed_items", { req: { ids } });
@@ -406,7 +403,7 @@ export async function retryDeadLetters(ids: string[]): Promise<RetryResult> {
     return {
       requested: ids.length,
       requeued: ids.length,
-      ignored: 0
+      ignored: 0,
     };
   }
   return invokeWithEnvelope<RetryResult>("retry_dead_letters", { req: { ids } });
@@ -421,15 +418,15 @@ export async function collectSource(
     return {
       source,
       fetched: 0,
-      stored: 0
+      stored: 0,
     };
   }
   return invokeWithEnvelope<CollectResult>("collect", {
     req: {
       source,
       since,
-      until
-    }
+      until,
+    },
   });
 }
 
@@ -438,7 +435,7 @@ export async function ingestXhsIncremental(): Promise<CollectResult> {
     return {
       source: "xhs",
       fetched: 0,
-      stored: 0
+      stored: 0,
     };
   }
   try {
@@ -462,11 +459,11 @@ export async function getIngestQueue(page: PageReq): Promise<Paged<IngestQueueIt
       page: page.page,
       page_size: page.page_size,
       total: 0,
-      items: []
+      items: [],
     };
   }
   return invokeWithEnvelope<Paged<IngestQueueItem>>("get_ingest_queue", {
-    req: { page }
+    req: { page },
   });
 }
 
@@ -478,11 +475,11 @@ export async function runNotionSyncOnce(limit?: number): Promise<SyncRunSummary>
       succeeded: 0,
       failed: 0,
       requeued: 0,
-      dead_lettered: 0
+      dead_lettered: 0,
     };
   }
   return invokeWithEnvelope<SyncRunSummary>("run_notion_sync_once", {
-    req: { limit }
+    req: { limit },
   });
 }
 
@@ -494,12 +491,12 @@ export async function publishApprovedToNotion(limit?: number): Promise<PublishRe
       succeeded: 0,
       failed: 0,
       requeued: 0,
-      dead_lettered: 0
+      dead_lettered: 0,
     };
   }
   try {
     return await invokeWithEnvelope<PublishResult>("publish_approved_to_notion", {
-      req: { limit }
+      req: { limit },
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -515,7 +512,7 @@ export async function publishApprovedToNotion(limit?: number): Promise<PublishRe
         succeeded: summary.succeeded,
         failed: summary.failed,
         requeued: summary.requeued,
-        dead_lettered: summary.dead_lettered
+        dead_lettered: summary.dead_lettered,
       };
     }
     throw error;
@@ -540,9 +537,9 @@ export async function getSyncLogs(range: DateRange, page: PageReq): Promise<Page
           id: "sync-log-1",
           state: "success",
           error_code: null,
-          created_at: new Date().toISOString()
-        }
-      ]
+          created_at: new Date().toISOString(),
+        },
+      ],
     };
   }
   return invokeWithEnvelope<Paged<SyncLog>>("get_sync_logs", { req: { range, page } });
@@ -568,9 +565,9 @@ export async function getSyncDailyStats(
           failed_runs: 0,
           success_rate: 0.5,
           avg_success_count: 1,
-          avg_fail_count: 0.5
-        }
-      ]
+          avg_fail_count: 0.5,
+        },
+      ],
     };
   }
   return invokeWithEnvelope<Paged<SyncDailyStat>>("get_sync_daily_stats", {
@@ -578,8 +575,8 @@ export async function getSyncDailyStats(
       range,
       page,
       job_type: filter?.job_type,
-      status: filter?.status
-    }
+      status: filter?.status,
+    },
   });
 }
 
@@ -589,12 +586,12 @@ export async function getPublishQueue(page: PageReq): Promise<Paged<PublishTask>
       page: page.page,
       page_size: page.page_size,
       total: 0,
-      items: []
+      items: [],
     };
   }
   try {
     return await invokeWithEnvelope<Paged<PublishTask>>("get_publish_queue", {
-      req: { page }
+      req: { page },
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -607,7 +604,7 @@ export async function getPublishQueue(page: PageReq): Promise<Paged<PublishTask>
         page: page.page,
         page_size: page.page_size,
         total: 0,
-        items: []
+        items: [],
       };
     }
     throw error;
@@ -624,7 +621,7 @@ export async function getPublishHistory(
       page: page.page,
       page_size: page.page_size,
       total: 0,
-      items: []
+      items: [],
     };
   }
   try {
@@ -634,12 +631,14 @@ export async function getPublishHistory(
         page,
         state: filters?.state,
         sync_mode: filters?.sync_mode,
-        retryable: filters?.retryable
-      }
+        retryable: filters?.retryable,
+      },
     });
     return {
       ...data,
-      items: Array.isArray(data.items) ? data.items.map((item) => normalizePublishHistoryItem(item)) : []
+      items: Array.isArray(data.items)
+        ? data.items.map((item) => normalizePublishHistoryItem(item))
+        : [],
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -652,7 +651,7 @@ export async function getPublishHistory(
         page: page.page,
         page_size: page.page_size,
         total: 0,
-        items: []
+        items: [],
       };
     }
     throw error;
@@ -660,7 +659,8 @@ export async function getPublishHistory(
 }
 
 function normalizePublishHistoryItem(input: unknown): PublishHistoryItem {
-  const data = typeof input === "object" && input !== null ? (input as Record<string, unknown>) : {};
+  const data =
+    typeof input === "object" && input !== null ? (input as Record<string, unknown>) : {};
   const readString = (...keys: string[]) => {
     for (const key of keys) {
       const value = data[key];
@@ -784,7 +784,7 @@ function normalizePublishHistoryItem(input: unknown): PublishHistoryItem {
     image_urls: readList("image_urls", "image_urls_json"),
     quality_state: readString("quality_state"),
     quality_score: readOptionalNumber("quality_score"),
-    degraded_fields: readList("degraded_fields", "degraded_fields_json")
+    degraded_fields: readList("degraded_fields", "degraded_fields_json"),
   };
 }
 
@@ -793,16 +793,20 @@ export async function markSourceInactive(itemId: string): Promise<SourceStateMar
     return {
       item_id: itemId,
       active_state: "inactive",
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
   }
   return invokeWithEnvelope<SourceStateMarkResult>("mark_source_inactive", {
-    req: { item_id: itemId }
+    req: { item_id: itemId },
   });
 }
 
-function normalizeSyncConfigSnapshot(input: unknown, source: "ipc" | "fallback"): SyncConfigSnapshot {
-  const data = typeof input === "object" && input !== null ? (input as Record<string, unknown>) : {};
+function normalizeSyncConfigSnapshot(
+  input: unknown,
+  source: "ipc" | "fallback"
+): SyncConfigSnapshot {
+  const data =
+    typeof input === "object" && input !== null ? (input as Record<string, unknown>) : {};
   const readString = (...keys: string[]) => {
     for (const key of keys) {
       const value = data[key];
@@ -837,9 +841,8 @@ function normalizeSyncConfigSnapshot(input: unknown, source: "ipc" | "fallback")
     return null;
   };
 
-  const rawMode = (
-    readString("mode", "notion_sync_mode", "sync_mode")?.toLowerCase() ?? "unknown"
-  ) as SyncConfigSnapshot["mode"];
+  const rawMode = (readString("mode", "notion_sync_mode", "sync_mode")?.toLowerCase() ??
+    "unknown") as SyncConfigSnapshot["mode"];
   const mode = rawMode === "page_tree" || rawMode === "database" ? rawMode : "unknown";
 
   return {
@@ -857,7 +860,7 @@ function normalizeSyncConfigSnapshot(input: unknown, source: "ipc" | "fallback")
     ),
     timezone: readString("timezone", "notion_timezone"),
     category_growth_limit: readNumber("category_growth_limit", "notion_category_growth_limit"),
-    source
+    source,
   };
 }
 
@@ -881,7 +884,8 @@ export async function getSyncConfigSnapshot(): Promise<SyncConfigSnapshot> {
         const legacy = await invokeWithEnvelope<unknown>("get_sync_config_snapshot");
         return normalizeSyncConfigSnapshot(legacy, "ipc");
       } catch (legacyError) {
-        const legacyMessage = legacyError instanceof Error ? legacyError.message : String(legacyError);
+        const legacyMessage =
+          legacyError instanceof Error ? legacyError.message : String(legacyError);
         if (
           legacyMessage.includes("unknown command") ||
           legacyMessage.includes("not managed") ||

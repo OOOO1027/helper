@@ -60,7 +60,7 @@ export function DashboardPage({ onNotify, onOpenReview }: Props) {
       try {
         const [metricsRes, insightRes] = await Promise.allSettled([
           getDashboardMetrics(),
-          getCollectionInsight()
+          getCollectionInsight(),
         ]);
         if (!mountedRef.current) {
           return;
@@ -174,14 +174,18 @@ export function DashboardPage({ onNotify, onOpenReview }: Props) {
                 <header>
                   <h3>今日采集去向总览（{insight.day}）</h3>
                   <p>
-                    {insight.today_total} = 待审 {insight.review_pending} + 已完成 {insight.review_done} + 异常{" "}
-                    {insight.review_rejected} + 直过 {insight.direct_no_review}
+                    {insight.today_total} = 待审 {insight.review_pending} + 已完成{" "}
+                    {insight.review_done} + 异常 {insight.review_rejected} + 直过{" "}
+                    {insight.direct_no_review}
                   </p>
                 </header>
                 <div className="summary-grid">
                   <div>
                     <span>来源分布</span>
-                    <strong>{insight.sources.map((item) => `${item.source}:${item.count}`).join(" / ") || "-"}</strong>
+                    <strong>
+                      {insight.sources.map((item) => `${item.source}:${item.count}`).join(" / ") ||
+                        "-"}
+                    </strong>
                   </div>
                   <div>
                     <span>Notion 已成功</span>
@@ -189,7 +193,9 @@ export function DashboardPage({ onNotify, onOpenReview }: Props) {
                   </div>
                   <div>
                     <span>Notion 待同步</span>
-                    <strong>{insight.sync_pending + insight.sync_retry + insight.sync_not_started}</strong>
+                    <strong>
+                      {insight.sync_pending + insight.sync_retry + insight.sync_not_started}
+                    </strong>
                   </div>
                   <div>
                     <span>Notion 失败</span>

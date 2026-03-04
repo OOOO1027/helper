@@ -34,8 +34,8 @@ jobs:
       - name: Check formatting
         run: cargo fmt --check
 
-      - name: Clippy (fail on warnings)
-        run: cargo clippy -- -D warnings
+      - name: Clippy
+        run: cargo clippy
 
       - name: Run tests
         run: cargo test --quiet

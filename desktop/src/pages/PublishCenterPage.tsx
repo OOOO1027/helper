@@ -6,7 +6,7 @@ import {
   getPublishHistory,
   getPublishQueue,
   publishApprovedToNotion,
-  toUserMessage
+  toUserMessage,
 } from "../services/ipc";
 import type { PublishHistoryItem, PublishResult, PublishTask } from "../types/contracts";
 import { nowLocalIso } from "../utils/time";
@@ -28,7 +28,7 @@ function createRange(days: number) {
   fromDate.setDate(fromDate.getDate() - days);
   return {
     from: fromDate.toISOString(),
-    to
+    to,
   };
 }
 
@@ -54,11 +54,11 @@ export function PublishCenterPage({ onNotify, onOpenHealth }: Props) {
     const range = createRange(7);
     const historyFilters = {
       sync_mode: syncModeFilter === "all" ? undefined : syncModeFilter,
-      retryable: showRetryableOnly ? true : undefined
+      retryable: showRetryableOnly ? true : undefined,
     };
     const [logsResult, statsResult] = await Promise.allSettled([
       getPublishHistory(range, { page: 1, page_size: 20 }, historyFilters),
-      getPublishQueue({ page: 1, page_size: 50 })
+      getPublishQueue({ page: 1, page_size: 50 }),
     ]);
 
     if (requestSeq !== requestSeqRef.current) {
@@ -95,7 +95,7 @@ export function PublishCenterPage({ onNotify, onOpenHealth }: Props) {
       setFeedback({
         level: "warning",
         message: "发布上限无效，请输入大于 0 的数字。",
-        nextStep: "下一步：修正上限后重新点击“立即发布到 Notion”。"
+        nextStep: "下一步：修正上限后重新点击“立即发布到 Notion”。",
       });
       return;
     }
@@ -115,7 +115,7 @@ export function PublishCenterPage({ onNotify, onOpenHealth }: Props) {
         nextStep:
           summary.failed > 0
             ? "下一步：打开“系统健康”查看失败原因并执行回放。"
-            : "下一步：去 Notion 查看最新分类与周分区条目。"
+            : "下一步：去 Notion 查看最新分类与周分区条目。",
       });
       onNotify({ level, message });
     } catch (e) {
@@ -128,7 +128,7 @@ export function PublishCenterPage({ onNotify, onOpenHealth }: Props) {
       setFeedback({
         level: "error",
         message,
-        nextStep
+        nextStep,
       });
       onNotify({ level: "error", message });
     } finally {
@@ -159,7 +159,9 @@ export function PublishCenterPage({ onNotify, onOpenHealth }: Props) {
 
       <article className="panel-card">
         <h3>立即发布</h3>
-        <p className="hint">结构：Personal / 分类 / ISO 周 / 条目页（结论摘要 + 关键要点 + 原文链接 + 标签）。</p>
+        <p className="hint">
+          结构：Personal / 分类 / ISO 周 / 条目页（结论摘要 + 关键要点 + 原文链接 + 标签）。
+        </p>
         <div className="inline-actions">
           <input
             className="text-input"

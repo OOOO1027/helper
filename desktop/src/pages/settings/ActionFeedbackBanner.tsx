@@ -15,7 +15,7 @@ export function ActionFeedbackBanner({
   actionBusy,
   onManualSync,
   onRetryDeadLetters,
-  onViewFailedLogs
+  onViewFailedLogs,
 }: Props) {
   if (!actionFeedback) {
     return null;
@@ -31,7 +31,12 @@ export function ActionFeedbackBanner({
       {actionFeedback.nextStep && <small>{actionFeedback.nextStep}</small>}
       <div className="inline-actions">
         {lastActionKind === "sync" && (
-          <button type="button" onClick={onManualSync} disabled={actionBusy} data-testid="settings-retry-sync">
+          <button
+            type="button"
+            onClick={onManualSync}
+            disabled={actionBusy}
+            data-testid="settings-retry-sync"
+          >
             重试同步
           </button>
         )}

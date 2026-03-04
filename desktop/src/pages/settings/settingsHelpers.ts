@@ -70,7 +70,7 @@ export function loadFilterSnapshot(): SettingsFilterSnapshot {
         rangeDays: 7,
         logsStateFilter: "failed",
         dailyJobTypeFilter: "all",
-        dailyStatusFilter: "all"
+        dailyStatusFilter: "all",
       };
     }
     const parsed = JSON.parse(raw) as unknown;
@@ -79,12 +79,15 @@ export function loadFilterSnapshot(): SettingsFilterSnapshot {
         rangeDays: 7,
         logsStateFilter: "failed",
         dailyJobTypeFilter: "all",
-        dailyStatusFilter: "all"
+        dailyStatusFilter: "all",
       };
     }
 
     const rangeDays =
-      parsed.rangeDays === 1 || parsed.rangeDays === 3 || parsed.rangeDays === 7 || parsed.rangeDays === 30
+      parsed.rangeDays === 1 ||
+      parsed.rangeDays === 3 ||
+      parsed.rangeDays === 7 ||
+      parsed.rangeDays === 30
         ? parsed.rangeDays
         : 7;
     const logsStateFilter =
@@ -116,14 +119,14 @@ export function loadFilterSnapshot(): SettingsFilterSnapshot {
       rangeDays,
       logsStateFilter,
       dailyJobTypeFilter,
-      dailyStatusFilter
+      dailyStatusFilter,
     };
   } catch {
     return {
       rangeDays: 7,
       logsStateFilter: "failed",
       dailyJobTypeFilter: "all",
-      dailyStatusFilter: "all"
+      dailyStatusFilter: "all",
     };
   }
 }
@@ -147,8 +150,8 @@ export function loadLastSyncSnapshot(): LastSyncSnapshot | null {
         succeeded: asNumber(summary.succeeded),
         failed: asNumber(summary.failed),
         requeued: asNumber(summary.requeued),
-        dead_lettered: asNumber(summary.dead_lettered)
-      }
+        dead_lettered: asNumber(summary.dead_lettered),
+      },
     };
   } catch {
     return null;
@@ -176,7 +179,7 @@ export function loadLatestImportSnapshot(): LatestImportSnapshot | null {
       status: failed === 0 ? "success" : asNumber(summary.persisted) > 0 ? "partial" : "failed",
       parsedOk: asNumber(summary.parsed_ok),
       persisted: asNumber(summary.persisted),
-      failed
+      failed,
     };
   } catch {
     return null;

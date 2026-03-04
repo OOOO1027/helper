@@ -2,16 +2,16 @@ use chrono::Local;
 use rusqlite::{params, Connection};
 use serde_json::{json, Value};
 
+use super::quality_eval::evaluate_structured_quality;
+use super::xhs_scraper::fetch_xhs_page_text;
+use super::{
+    dedupe_string_vec, extract_string_list, normalize_string_list, normalize_text_output,
+    BudgetGuardPolicy, ModelUsageRecord, PendingSyncRow, StructuredContent,
+    StructuredContentConfig, StructuredContentState,
+};
 use crate::config;
 use crate::env_runtime::env_with_shell_fallback;
 use crate::{BackendError, Result};
-use super::{
-    dedupe_string_vec, extract_string_list, normalize_string_list, normalize_text_output,
-    BudgetGuardPolicy, ModelUsageRecord, PendingSyncRow, StructuredContent, StructuredContentConfig,
-    StructuredContentState,
-};
-use super::quality_eval::evaluate_structured_quality;
-use super::xhs_scraper::fetch_xhs_page_text;
 
 pub(super) fn load_structured_content_config() -> StructuredContentConfig {
     let enabled = config::env_bool("B2_G2_AI_ENABLED", true);
@@ -30,8 +30,7 @@ pub(super) fn load_structured_content_config() -> StructuredContentConfig {
     .max(1)
     .min(max_calls_per_run);
     let budget_limit_cny = config::env_f64("B2_G2_MONTHLY_BUDGET_CNY", 100.0).max(1.0);
-    let budget_degrade_ratio = config::env_f64("B2_G2_BUDGET_DEGRADE_RATIO", 0.80)
-        .clamp(0.0, 1.0);
+    let budget_degrade_ratio = config::env_f64("B2_G2_BUDGET_DEGRADE_RATIO", 0.80).clamp(0.0, 1.0);
     let budget_fuse_ratio = config::env_f64("B2_G2_BUDGET_FUSE_RATIO", 1.0)
         .max(budget_degrade_ratio)
         .clamp(0.0, 5.0);
@@ -139,11 +138,7 @@ pub(super) async fn build_structured_content(
         state.calls_used += 1;
         let source_text = build_ai_source_text(row, &state.config).await;
         match generate_structured_with_qwen(
-            state
-                .config
-                .api_key
-                .as_deref()
-                .unwrap_or_default(),
+            state.config.api_key.as_deref().unwrap_or_default(),
             &state.config.model,
             route_reason,
             &source_text,
@@ -246,7 +241,8 @@ async fn build_ai_source_text(row: &PendingSyncRow, config: &StructuredContentCo
     }
     if config.deep_fetch_enabled && row.source == "xhs" {
         if let Some(source_url) = row.source_url.as_deref() {
-            if let Some(fetched_text) = fetch_xhs_page_text(source_url, config.fetch_timeout_ms).await
+            if let Some(fetched_text) =
+                fetch_xhs_page_text(source_url, config.fetch_timeout_ms).await
             {
                 if !fetched_text.trim().is_empty() {
                     text = format!("{text}\n{fetched_text}");

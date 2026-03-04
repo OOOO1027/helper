@@ -5,7 +5,7 @@ import {
   getLocalToolStatus,
   importWechatAndPersist,
   pickWechatFiles,
-  toUserMessage
+  toUserMessage,
 } from "../services/ipc";
 import type { ImportPersistSummary, LocalToolStatus } from "../types/contracts";
 
@@ -71,7 +71,7 @@ function normalizeHistorySummary(
       duplicates: asNumber(input.duplicates),
       parse_failed: asNumber(input.parse_failed),
       persisted: asNumber(input.persisted),
-      persist_failed: asNumber(input.persist_failed)
+      persist_failed: asNumber(input.persist_failed),
     };
   }
 
@@ -91,7 +91,7 @@ function normalizeHistorySummary(
       duplicates,
       parse_failed: parseFailed,
       persisted: Math.max(parsedOk - duplicates - parseFailed, 0),
-      persist_failed: 0
+      persist_failed: 0,
     };
   }
 
@@ -136,7 +136,7 @@ function loadHistory(): ImportHistoryItem[] {
           createdAt:
             typeof entry.createdAt === "string" && entry.createdAt.trim().length > 0
               ? entry.createdAt
-              : new Date().toISOString()
+              : new Date().toISOString(),
         } satisfies ImportHistoryItem;
       })
       .filter((item): item is ImportHistoryItem => Boolean(item))
@@ -169,7 +169,7 @@ export function ImportCenterPage({
   onOpenExceptions,
   onOpenReview,
   onOpenSettings,
-  startupToolStatus
+  startupToolStatus,
 }: Props) {
   const [paths, setPaths] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -180,7 +180,10 @@ export function ImportCenterPage({
   const [progress, setProgress] = useState(0);
   const [xhsSyncing, setXhsSyncing] = useState(false);
   const [toolStatus, setToolStatus] = useState<LocalToolStatus | null>(startupToolStatus);
-  const activeMissingTools = useMemo(() => (toolStatus ? missingTools(toolStatus) : []), [toolStatus]);
+  const activeMissingTools = useMemo(
+    () => (toolStatus ? missingTools(toolStatus) : []),
+    [toolStatus]
+  );
 
   const canSubmit = useMemo(
     () => paths.length > 0 && !loading && activeMissingTools.length === 0,
@@ -222,7 +225,7 @@ export function ImportCenterPage({
         source: "import",
         level: "error",
         message,
-        nextStep: "下一步：检查文件权限后重试；若仍失败，请在 Finder 中确认微信导出目录可访问。"
+        nextStep: "下一步：检查文件权限后重试；若仍失败，请在 Finder 中确认微信导出目录可访问。",
       });
       onNotify({ level: "error", message });
     }
@@ -236,7 +239,7 @@ export function ImportCenterPage({
       if (missing.length > 0) {
         onNotify({
           level: "warning",
-          message: `工具检查结果：缺少 ${missing.join("、")}，请先补齐再导入。`
+          message: `工具检查结果：缺少 ${missing.join("、")}，请先补齐再导入。`,
         });
       } else {
         onNotify({ level: "success", message: "工具检查结果：本地导入能力可用。" });
@@ -261,7 +264,7 @@ export function ImportCenterPage({
           source: "import",
           level: "warning",
           message,
-          nextStep: "下一步：点击“检查工具”确认环境，或去“设置与日志”检查配置。"
+          nextStep: "下一步：点击“检查工具”确认环境，或去“设置与日志”检查配置。",
         });
         setJobState("failed");
         onNotify({ level: "warning", message });
@@ -277,13 +280,17 @@ export function ImportCenterPage({
           fileCount: paths.length,
           status: result.parse_failed + result.persist_failed > 0 ? "partial" : "success",
           summary: result,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
         return [nextItem, ...prev].slice(0, 20);
       });
       const failed = result.parse_failed + result.persist_failed;
       const importOutcome: ImportJobState =
-        failed === 0 ? "success" : result.persisted > 0 || result.parsed_ok > 0 ? "partial" : "failed";
+        failed === 0
+          ? "success"
+          : result.persisted > 0 || result.parsed_ok > 0
+            ? "partial"
+            : "failed";
       setJobState(importOutcome);
       setFeedback(
         importOutcome === "success"
@@ -291,30 +298,35 @@ export function ImportCenterPage({
               source: "import",
               level: "success",
               message: `导入状态：成功。解析成功 ${result.parsed_ok}，入库 ${result.persisted}。`,
-              nextStep: "下一步：进入审核队列，处理新增内容。"
+              nextStep: "下一步：进入审核队列，处理新增内容。",
             }
           : importOutcome === "partial"
             ? {
                 source: "import",
                 level: "warning",
                 message: `导入状态：部分成功。解析成功 ${result.parsed_ok}，入库 ${result.persisted}，失败 ${failed}。`,
-                nextStep: "下一步：点击“前往异常标签页”处理失败项，再继续导入。"
+                nextStep: "下一步：点击“前往异常标签页”处理失败项，再继续导入。",
               }
             : {
                 source: "import",
                 level: "error",
                 message: `导入状态：失败。失败 ${failed}，未完成入库。`,
-                nextStep: "下一步：点击“重试导入”；若持续失败，请去“设置与日志”检查工具环境。"
+                nextStep: "下一步：点击“重试导入”；若持续失败，请去“设置与日志”检查工具环境。",
               }
       );
       onNotify({
-        level: importOutcome === "success" ? "success" : importOutcome === "partial" ? "warning" : "error",
+        level:
+          importOutcome === "success"
+            ? "success"
+            : importOutcome === "partial"
+              ? "warning"
+              : "error",
         message:
           importOutcome === "success"
             ? `导入状态：成功。解析成功 ${result.parsed_ok}，入库 ${result.persisted}。`
             : importOutcome === "partial"
               ? `导入状态：部分成功。解析成功 ${result.parsed_ok}，入库 ${result.persisted}，失败 ${failed}。`
-              : `导入状态：失败。失败 ${failed}，请重试或检查设置。`
+              : `导入状态：失败。失败 ${failed}，请重试或检查设置。`,
       });
     } catch (e) {
       const message = toUserMessage(e, "导入失败");
@@ -322,7 +334,7 @@ export function ImportCenterPage({
         source: "import",
         level: "error",
         message,
-        nextStep: "下一步：点击“重试导入”；若持续失败，请去“设置与日志”检查环境后再试。"
+        nextStep: "下一步：点击“重试导入”；若持续失败，请去“设置与日志”检查环境后再试。",
       });
       setJobState("failed");
       onNotify({ level: "error", message });
@@ -342,7 +354,7 @@ export function ImportCenterPage({
         source: "xhs",
         level: "success",
         message,
-        nextStep: "下一步：进入审核队列查看新增项。"
+        nextStep: "下一步：进入审核队列查看新增项。",
       });
     } catch (e) {
       const message = toUserMessage(e, "小红书同步失败");
@@ -351,7 +363,8 @@ export function ImportCenterPage({
         source: "xhs",
         level: "error",
         message,
-        nextStep: "下一步：确认 Chrome 已登录小红书，并在开发者菜单开启“允许 Apple 事件中的 JavaScript”。"
+        nextStep:
+          "下一步：确认 Chrome 已登录小红书，并在开发者菜单开启“允许 Apple 事件中的 JavaScript”。",
       });
     } finally {
       setXhsSyncing(false);
@@ -456,10 +469,21 @@ export function ImportCenterPage({
       </div>
 
       {activeMissingTools.length > 0 && (
-        <div className="state-panel error" role="alert" aria-live="assertive" data-testid="import-tools-missing">
-          启动检测发现本地导入能力缺失：{activeMissingTools.join("、")}。涉及 PDF/文档导出文件暂不可解析，请补齐后再导入。
+        <div
+          className="state-panel error"
+          role="alert"
+          aria-live="assertive"
+          data-testid="import-tools-missing"
+        >
+          启动检测发现本地导入能力缺失：{activeMissingTools.join("、")}。涉及
+          PDF/文档导出文件暂不可解析，请补齐后再导入。
           <div className="inline-actions">
-            <button type="button" onClick={onCheckTools} disabled={loading} data-testid="import-check-tools">
+            <button
+              type="button"
+              onClick={onCheckTools}
+              disabled={loading}
+              data-testid="import-check-tools"
+            >
               检查工具
             </button>
             <button type="button" onClick={onOpenSettings} data-testid="import-open-settings">
@@ -505,7 +529,12 @@ export function ImportCenterPage({
           <div className="inline-actions">
             {feedback.source === "import" ? (
               <>
-                <button type="button" onClick={onImport} disabled={!canSubmit} data-testid="import-retry">
+                <button
+                  type="button"
+                  onClick={onImport}
+                  disabled={!canSubmit}
+                  data-testid="import-retry"
+                >
                   重试导入
                 </button>
                 <button
@@ -516,7 +545,11 @@ export function ImportCenterPage({
                 >
                   检查工具
                 </button>
-                <button type="button" onClick={onOpenSettings} data-testid="import-feedback-open-settings">
+                <button
+                  type="button"
+                  onClick={onOpenSettings}
+                  data-testid="import-feedback-open-settings"
+                >
                   去设置页
                 </button>
                 {(jobState === "success" || jobState === "partial") && (
@@ -525,14 +558,23 @@ export function ImportCenterPage({
                   </button>
                 )}
                 {jobState === "partial" && (
-                  <button type="button" onClick={onOpenExceptions} data-testid="import-feedback-open-exceptions">
+                  <button
+                    type="button"
+                    onClick={onOpenExceptions}
+                    data-testid="import-feedback-open-exceptions"
+                  >
                     前往异常标签页
                   </button>
                 )}
               </>
             ) : (
               <>
-                <button type="button" onClick={onSyncXhs} disabled={xhsSyncing || loading} data-testid="xhs-retry">
+                <button
+                  type="button"
+                  onClick={onSyncXhs}
+                  disabled={xhsSyncing || loading}
+                  data-testid="xhs-retry"
+                >
                   {xhsSyncing ? "重试中..." : "重试小红书同步"}
                 </button>
                 <button type="button" onClick={onOpenReview} data-testid="xhs-open-review">

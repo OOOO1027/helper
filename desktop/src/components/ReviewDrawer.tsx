@@ -239,7 +239,11 @@ export function ReviewDrawer({ item, busy, onClose, onDecision }: Props) {
                     复制
                   </button>
                   {copyFeedback?.field === "id" && (
-                    <small className={`copy-feedback ${copyFeedback.tone}`} role="status" aria-live="polite">
+                    <small
+                      className={`copy-feedback ${copyFeedback.tone}`}
+                      role="status"
+                      aria-live="polite"
+                    >
                       {copyFeedback.message}
                     </small>
                   )}
@@ -258,7 +262,11 @@ export function ReviewDrawer({ item, busy, onClose, onDecision }: Props) {
                     复制
                   </button>
                   {copyFeedback?.field === "normalizedId" && (
-                    <small className={`copy-feedback ${copyFeedback.tone}`} role="status" aria-live="polite">
+                    <small
+                      className={`copy-feedback ${copyFeedback.tone}`}
+                      role="status"
+                      aria-live="polite"
+                    >
                       {copyFeedback.message}
                     </small>
                   )}

@@ -3,9 +3,7 @@ use uuid::Uuid;
 
 use crate::{BackendError, Result};
 
-use super::{
-    AppCore, DateRange, PageReq, Paged, SyncDailyStat, SyncLog,
-};
+use super::{AppCore, DateRange, PageReq, Paged, SyncDailyStat, SyncLog};
 
 impl AppCore {
     pub fn get_sync_logs(&self, _range: DateRange, page: PageReq) -> Result<Paged<SyncLog>> {

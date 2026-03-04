@@ -13,8 +13,8 @@ use crate::app_core::{
     SyncLog,
 };
 use crate::budget_guard::BudgetStatus;
-use crate::env_runtime::env_with_shell_fallback;
 use crate::config;
+use crate::env_runtime::env_with_shell_fallback;
 use crate::storage::db::{open_sqlcipher, run_migrations, DbConfig};
 use crate::sync_notion::notion_api::NotionHttpClient;
 use crate::sync_notion::service::{
@@ -730,10 +730,13 @@ fn normalize_month_key(raw: Option<String>) -> Result<String> {
     };
     let valid = candidate.len() == 7
         && candidate.chars().nth(4) == Some('-')
-        && candidate
-            .chars()
-            .enumerate()
-            .all(|(idx, ch)| if idx == 4 { ch == '-' } else { ch.is_ascii_digit() });
+        && candidate.chars().enumerate().all(|(idx, ch)| {
+            if idx == 4 {
+                ch == '-'
+            } else {
+                ch.is_ascii_digit()
+            }
+        });
     if !valid {
         return Err(BackendError::Validation(
             "month must be in YYYY-MM format".to_string(),

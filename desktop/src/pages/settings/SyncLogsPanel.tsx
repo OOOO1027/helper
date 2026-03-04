@@ -47,7 +47,7 @@ export function SyncLogsPanel({
   onPrevPage,
   onNextPage,
   onRefresh,
-  onQueueReplayId
+  onQueueReplayId,
 }: Props) {
   return (
     <article className="panel-card">
@@ -67,11 +67,7 @@ export function SyncLogsPanel({
         </select>
         <select
           value={logsStateFilter}
-          onChange={(event) =>
-            onLogsStateFilterChange(
-              event.target.value as LogStateFilter
-            )
-          }
+          onChange={(event) => onLogsStateFilterChange(event.target.value as LogStateFilter)}
           disabled={actionBusy}
         >
           <option value="failed">状态：失败优先</option>
@@ -82,11 +78,7 @@ export function SyncLogsPanel({
           <option value="skipped">已跳过</option>
         </select>
         <span className="hint">时间范围切换后自动刷新日志与日统计</span>
-        <button
-          type="button"
-          onClick={onResetFilters}
-          disabled={actionBusy || !hasActiveFilters}
-        >
+        <button type="button" onClick={onResetFilters} disabled={actionBusy || !hasActiveFilters}>
           重置筛选
         </button>
       </div>
@@ -105,11 +97,7 @@ export function SyncLogsPanel({
               key={state}
               type="button"
               className={logsStateFilter === state ? "reason-chip active" : "reason-chip"}
-              onClick={() =>
-                onLogsStateFilterChange(
-                  state as LogStateFilter
-                )
-              }
+              onClick={() => onLogsStateFilterChange(state as LogStateFilter)}
               disabled={actionBusy}
             >
               {formatLogState(state)} ({count})
@@ -123,8 +111,8 @@ export function SyncLogsPanel({
         empty={filteredLogs.length === 0}
         loadingText="同步日志加载中..."
         emptyText="当前筛选条件下暂无同步日志。可放宽时间范围或切换状态后重试。"
-        errorNextStep="下一步：点击"重试加载日志"；若仍失败，请先执行一次"立即同步一次"再刷新。"
-        emptyNextStep="下一步：先将状态切到"全部"或扩大时间范围，再点击"刷新日志"。"
+        errorNextStep="下一步：点击「重试加载日志」；若仍失败，请先执行一次「立即同步一次」再刷新。"
+        emptyNextStep="下一步：先将状态切到「全部」或扩大时间范围，再点击「刷新日志」。"
         onRetry={onRefresh}
         retryLabel="重试加载日志"
       >
@@ -144,7 +132,9 @@ export function SyncLogsPanel({
                 <tr key={log.id}>
                   <td>{log.id.slice(0, 8)}</td>
                   <td>
-                    <span className={`tag ${logStateTone(log.state)}`}>{formatLogState(log.state)}</span>
+                    <span className={`tag ${logStateTone(log.state)}`}>
+                      {formatLogState(log.state)}
+                    </span>
                   </td>
                   <td>{log.error_code ?? "-"}</td>
                   <td>{formatTime(log.created_at)}</td>

@@ -9,7 +9,7 @@ import {
   getPublishHistory,
   getSyncConfigSnapshot,
   retryDeadLetters,
-  toUserMessage
+  toUserMessage,
 } from "../services/ipc";
 import type {
   AiUsageMonthlySummary,
@@ -17,7 +17,7 @@ import type {
   DashboardMetrics,
   PublishHistoryItem,
   RetryResult,
-  SyncConfigSnapshot
+  SyncConfigSnapshot,
 } from "../types/contracts";
 import { formatPercent, nowLocalIso } from "../utils/time";
 
@@ -67,18 +67,8 @@ function getIsoWeekKey(date: Date): string {
   const day = utc.getUTCDay() || 7;
   utc.setUTCDate(utc.getUTCDate() + 4 - day);
   const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil((((utc.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  const weekNo = Math.ceil(((utc.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
   return `${utc.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
-}
-
-function monthDays(monthKey: string): number {
-  const [yearRaw, monthRaw] = monthKey.split("-");
-  const year = Number(yearRaw);
-  const month = Number(monthRaw);
-  if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) {
-    return 30;
-  }
-  return new Date(year, month, 0).getDate();
 }
 
 function buildMonthWeekKeys(monthKey: string): string[] {
@@ -127,11 +117,11 @@ export function SystemHealthPage({ onNotify }: Props) {
     fromDate.setDate(fromDate.getDate() - 7);
     const range = {
       from: fromDate.toISOString(),
-      to
+      to,
     };
     const historyFilters = {
       sync_mode: syncModeFilter === "all" ? undefined : syncModeFilter,
-      retryable: showRetryableOnly ? true : undefined
+      retryable: showRetryableOnly ? true : undefined,
     };
 
     const [metricsRes, insightRes, cfgRes, usageRes, logsRes] = await Promise.allSettled([
@@ -139,7 +129,7 @@ export function SystemHealthPage({ onNotify }: Props) {
       getCollectionInsight(),
       getSyncConfigSnapshot(),
       getAiUsageMonthlySummary(),
-      getPublishHistory(range, { page: 1, page_size: 20 }, historyFilters)
+      getPublishHistory(range, { page: 1, page_size: 20 }, historyFilters),
     ]);
 
     if (requestSeq !== requestSeqRef.current) {
@@ -191,7 +181,7 @@ export function SystemHealthPage({ onNotify }: Props) {
       setFeedback({
         level: "warning",
         message: "未输入可回放 ID。",
-        nextStep: "下一步：从失败日志复制 ID 后再执行回放。"
+        nextStep: "下一步：从失败日志复制 ID 后再执行回放。",
       });
       return;
     }
@@ -208,7 +198,7 @@ export function SystemHealthPage({ onNotify }: Props) {
         nextStep:
           result.requeued === result.requested
             ? "下一步：刷新系统健康数据确认状态变化。"
-            : "下一步：检查 ID 是否来自失败日志后再次回放。"
+            : "下一步：检查 ID 是否来自失败日志后再次回放。",
       });
       onNotify({ level, message });
       setDeadLetterIds("");
@@ -217,7 +207,7 @@ export function SystemHealthPage({ onNotify }: Props) {
       setFeedback({
         level: "error",
         message,
-        nextStep: "下一步：检查配置与ID有效性后重试。"
+        nextStep: "下一步：检查配置与ID有效性后重试。",
       });
       onNotify({ level: "error", message });
     } finally {
@@ -258,7 +248,7 @@ export function SystemHealthPage({ onNotify }: Props) {
           calls: 0,
           tokens_in: 0,
           tokens_out: 0,
-          cost_cny: 0
+          cost_cny: 0,
         } as WeeklyUsageRow);
       current.calls += item.calls;
       current.tokens_in += item.tokens_in;
@@ -278,7 +268,7 @@ export function SystemHealthPage({ onNotify }: Props) {
           calls: 0,
           tokens_in: 0,
           tokens_out: 0,
-          cost_cny: 0
+          cost_cny: 0,
         };
       })
       .reverse();
@@ -355,11 +345,7 @@ export function SystemHealthPage({ onNotify }: Props) {
               </article>
               <article className="metric-card">
                 <span>预算占用</span>
-                <strong>
-                  {formatPercent(
-                    aiUsage?.usage_ratio ?? metrics.budget_usage_ratio
-                  )}
-                </strong>
+                <strong>{formatPercent(aiUsage?.usage_ratio ?? metrics.budget_usage_ratio)}</strong>
                 <small>80%自动降载，100%自动熔断</small>
               </article>
             </section>
@@ -399,7 +385,9 @@ export function SystemHealthPage({ onNotify }: Props) {
                 <div className="kv-row">
                   <span>已用 / 上限</span>
                   <code>
-                    {aiUsage ? `${formatCny(aiUsage.used_cny)} / ${formatCny(aiUsage.budget_limit_cny)}` : "-"}
+                    {aiUsage
+                      ? `${formatCny(aiUsage.used_cny)} / ${formatCny(aiUsage.budget_limit_cny)}`
+                      : "-"}
                   </code>
                 </div>
                 <div className="kv-row">
@@ -431,7 +419,9 @@ export function SystemHealthPage({ onNotify }: Props) {
                   <code>{aiUsage ? formatCny(aiUsage.avg_cost_per_call_cny) : "-"}</code>
                 </div>
                 {budgetAlertLevel !== "none" && (
-                  <div className={`state-panel ${budgetAlertLevel === "error" ? "error" : "warning"}`}>
+                  <div
+                    className={`state-panel ${budgetAlertLevel === "error" ? "error" : "warning"}`}
+                  >
                     <div>
                       {budgetAlertLevel === "error"
                         ? "预算熔断：当前或预测花费已达到/超过月预算上限，AI 生成将自动停用。"

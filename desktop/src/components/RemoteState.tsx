@@ -24,7 +24,7 @@ export function RemoteState(props: Props) {
     emptyNextStep,
     onRetry,
     retryLabel = "重试",
-    children
+    children,
   } = props;
 
   if (loading) {

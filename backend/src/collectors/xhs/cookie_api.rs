@@ -5,8 +5,8 @@ use serde_json::Value;
 use crate::env_runtime::env_with_shell_fallback;
 use crate::{BackendError, Result};
 
-use super::XHS_BASE_URL;
 use super::XhsCollector;
+use super::XHS_BASE_URL;
 
 impl XhsCollector {
     pub(super) fn resolve_cookie(&self) -> Option<String> {
@@ -62,8 +62,7 @@ impl XhsCollector {
                 "xhs request rejected: http_status={status}"
             )));
         }
-        serde_json::from_str(&body).map_err(|e| {
-            BackendError::Internal(format!("xhs response json decode failed: {e}"))
-        })
+        serde_json::from_str(&body)
+            .map_err(|e| BackendError::Internal(format!("xhs response json decode failed: {e}")))
     }
 }

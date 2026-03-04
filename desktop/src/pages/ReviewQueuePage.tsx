@@ -10,7 +10,7 @@ import {
   publishApprovedToNotion,
   retryFailedItems,
   toUserMessage,
-  updateReviewItem
+  updateReviewItem,
 } from "../services/ipc";
 import type { ReviewItem, ReviewTab } from "../types/contracts";
 import type {
@@ -20,7 +20,7 @@ import type {
   PriorityFilter,
   SessionActionLog,
   SortMode,
-  TabCounts
+  TabCounts,
 } from "../components/review/types";
 
 interface Props {
@@ -93,7 +93,7 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
   const [tabCounts, setTabCounts] = useState<TabCounts>({
     pending: 0,
     exception: 0,
-    done: 0
+    done: 0,
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
@@ -130,7 +130,10 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
     const term = query.trim().toLowerCase();
     const textFiltered = term
       ? priorityFiltered.filter((item) =>
-          [item.title, item.reason, item.id, item.normalizedId].join(" ").toLowerCase().includes(term)
+          [item.title, item.reason, item.id, item.normalizedId]
+            .join(" ")
+            .toLowerCase()
+            .includes(term)
         )
       : priorityFiltered;
 
@@ -172,22 +175,22 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
         const [queueResult, countResult] = await Promise.allSettled([
           getReviewQueue({
             filter: { state: tabToFilter(tab) },
-            page: { page: 1, page_size: 20 }
+            page: { page: 1, page_size: 20 },
           }),
           Promise.all([
             getReviewQueue({
               filter: { state: "pending" },
-              page: { page: 1, page_size: 1 }
+              page: { page: 1, page_size: 1 },
             }),
             getReviewQueue({
               filter: { state: "rejected" },
-              page: { page: 1, page_size: 1 }
+              page: { page: 1, page_size: 1 },
             }),
             getReviewQueue({
               filter: { state: "done" },
-              page: { page: 1, page_size: 1 }
-            })
-          ])
+              page: { page: 1, page_size: 1 },
+            }),
+          ]),
         ]);
         if (requestSeq !== requestSeqRef.current) {
           return;
@@ -201,12 +204,12 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
           setTabCounts({
             pending: pendingRes.total,
             exception: exceptionRes.total,
-            done: doneRes.total
+            done: doneRes.total,
           });
         }
         setItems(res.items);
         const hasPreferred = preferredId && res.items.some((item) => item.id === preferredId);
-        setSelectedId(hasPreferred ? preferredId ?? null : res.items[0]?.id ?? null);
+        setSelectedId(hasPreferred ? (preferredId ?? null) : (res.items[0]?.id ?? null));
         setCheckedIds([]);
       } catch (e) {
         if (requestSeq !== requestSeqRef.current) {
@@ -272,15 +275,17 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
   }, []);
 
   const appendSessionLog = (action: string, detail: string) => {
-    setSessionLogs((prev) => [
-      {
-        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        at: Date.now(),
-        action,
-        detail
-      },
-      ...prev
-    ].slice(0, 8));
+    setSessionLogs((prev) =>
+      [
+        {
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          at: Date.now(),
+          action,
+          detail,
+        },
+        ...prev,
+      ].slice(0, 8)
+    );
   };
 
   const decisionLabel = (decision: Decision): string => {
@@ -310,15 +315,15 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
             id,
             patch: {
               state: decision === "approved" ? "done" : "rejected",
-              note: `manual:${decision}`
-            }
+              note: `manual:${decision}`,
+            },
           });
           success += 1;
         } catch (e) {
           failed += 1;
           failedItems.push({
             id,
-            message: toUserMessage(e, "更新失败")
+            message: toUserMessage(e, "更新失败"),
           });
         }
       }
@@ -330,43 +335,43 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
         setActionFeedback({
           level: "success",
           message: `已${decisionLabel(decision)} ${success} 条`,
-          nextStep: "下一步：继续处理下一批，或切换“异常”标签检查待重试项。"
+          nextStep: "下一步：继续处理下一批，或切换“异常”标签检查待重试项。",
         });
         onNotify({ level: "success", message: `已${decisionLabel(decision)} ${success} 条` });
       } else {
         setActionFeedback({
           level: "warning",
           message: `已${decisionLabel(decision)} ${success} 条，失败 ${failed} 条`,
-          nextStep: "下一步：先查看下方失败明细，再点击“批量重试”处理失败项。"
+          nextStep: "下一步：先查看下方失败明细，再点击“批量重试”处理失败项。",
         });
         onNotify({
           level: "warning",
-          message: `已${decisionLabel(decision)} ${success} 条，失败 ${failed} 条`
+          message: `已${decisionLabel(decision)} ${success} 条，失败 ${failed} 条`,
         });
       }
 
       appendSessionLog(`批量${decisionLabel(decision)}`, `成功 ${success} 条，失败 ${failed} 条`);
       setLastFailures(failedItems);
       await reload(preferredId ?? undefined);
-        setCheckedIds([]);
-        if (success > 0) {
-          try {
+      setCheckedIds([]);
+      if (success > 0) {
+        try {
           const syncSummary = await publishApprovedToNotion(AUTO_SYNC_LIMIT);
           const syncText = `Notion 同步：成功 ${syncSummary.succeeded} / 失败 ${syncSummary.failed}（尝试 ${syncSummary.attempted}）`;
           appendSessionLog("自动同步 Notion", syncText);
           onNotify({
             level: syncSummary.failed > 0 ? "warning" : "success",
-            message: syncText
+            message: syncText,
           });
           setActionFeedback((prev) => {
             const merged = prev?.message ? `${prev.message}；${syncText}` : syncText;
             return {
-              level: syncSummary.failed > 0 ? "warning" : prev?.level ?? "success",
+              level: syncSummary.failed > 0 ? "warning" : (prev?.level ?? "success"),
               message: merged,
               nextStep:
                 syncSummary.failed > 0
                   ? "下一步：去“系统健康”查看失败详情并回放。"
-                  : "下一步：可到“系统健康”确认同步日志。"
+                  : "下一步：可到“系统健康”确认同步日志。",
             };
           });
         } catch (syncError) {
@@ -374,7 +379,7 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
           appendSessionLog("自动同步 Notion", `失败：${syncMessage}`);
           onNotify({
             level: "warning",
-            message: `Notion 自动同步失败：${syncMessage}`
+            message: `Notion 自动同步失败：${syncMessage}`,
           });
           setActionFeedback((prev) => {
             const merged = prev?.message
@@ -383,7 +388,7 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
             return {
               level: "warning",
               message: merged,
-              nextStep: "下一步：去“发布中心”重试发布，或在“系统健康”查看失败细节。"
+              nextStep: "下一步：去“发布中心”重试发布，或在“系统健康”查看失败细节。",
             };
           });
         }
@@ -393,7 +398,7 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
       setActionFeedback({
         level: "error",
         message: `提交失败：${message}`,
-        nextStep: "下一步：点击“重试加载队列”刷新后再提交；若仍失败，请切换异常标签排查。"
+        nextStep: "下一步：点击“重试加载队列”刷新后再提交；若仍失败，请切换异常标签排查。",
       });
       onNotify({ level: "error", message: `提交失败：${message}` });
     } finally {
@@ -420,7 +425,7 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
       setActionFeedback({
         level: "warning",
         message: "没有可重试的异常项",
-        nextStep: "下一步：切换到“异常”标签后选择记录，再执行批量重试。"
+        nextStep: "下一步：切换到“异常”标签后选择记录，再执行批量重试。",
       });
       return;
     }
@@ -435,7 +440,7 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
         nextStep:
           result.requeued === result.requested
             ? "下一步：回到“待审核”标签继续处理。"
-            : "下一步：检查失败明细并再次批量重试。"
+            : "下一步：检查失败明细并再次批量重试。",
       });
       onNotify({ level, message: `重试完成：${result.requeued}/${result.requested}` });
       appendSessionLog("批量重试", `重试 ${result.requested} 条，成功重排 ${result.requeued} 条`);
@@ -445,7 +450,7 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
       setActionFeedback({
         level: "error",
         message: `重试失败：${message}`,
-        nextStep: "下一步：先刷新队列，再确认失败记录仍在异常列表后重试。"
+        nextStep: "下一步：先刷新队列，再确认失败记录仍在异常列表后重试。",
       });
       onNotify({ level: "error", message: `重试失败：${message}` });
     } finally {
@@ -538,8 +543,15 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
         )}
 
         <div className="filter-bar">
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="按标题/原因/ID筛选" />
-          <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)}>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="按标题/原因/ID筛选"
+          />
+          <select
+            value={sortMode}
+            onChange={(event) => setSortMode(event.target.value as SortMode)}
+          >
             <option value="priority_desc">优先级：高到低</option>
             <option value="priority_asc">优先级：低到高</option>
           </select>
@@ -671,7 +683,9 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
                         onChange={(event) => {
                           event.stopPropagation();
                           setCheckedIds((prev) =>
-                            event.target.checked ? [...prev, item.id] : prev.filter((id) => id !== item.id)
+                            event.target.checked
+                              ? [...prev, item.id]
+                              : prev.filter((id) => id !== item.id)
                           );
                         }}
                       />
@@ -684,7 +698,9 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
                     </td>
                     <td>{item.priority.toFixed(2)}</td>
                     <td>
-                      <span className={`tag ${reviewStateTone(item.state)}`}>{formatReviewState(item.state)}</span>
+                      <span className={`tag ${reviewStateTone(item.state)}`}>
+                        {formatReviewState(item.state)}
+                      </span>
                     </td>
                     <td>{item.reason}</td>
                   </tr>
@@ -695,7 +711,12 @@ export function ReviewQueuePage({ onNotify, forceTab, forceToken }: Props) {
         </RemoteState>
       </div>
 
-      <ReviewDrawer item={selectedItem} busy={actionBusy} onClose={() => setSelectedId(null)} onDecision={onDecision} />
+      <ReviewDrawer
+        item={selectedItem}
+        busy={actionBusy}
+        onClose={() => setSelectedId(null)}
+        onDecision={onDecision}
+      />
     </section>
   );
 }

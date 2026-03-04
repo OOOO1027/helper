@@ -70,17 +70,6 @@ function formatTime(value: string): string {
   return date.toLocaleString("zh-CN");
 }
 
-function normalizeMode(mode?: string | null): string {
-  if (!mode) {
-    return "unknown";
-  }
-  const normalized = mode.trim().toLowerCase();
-  if (!normalized) {
-    return "unknown";
-  }
-  return normalized;
-}
-
 function formatRouteValue(value?: string | null): string {
   const normalized = value?.trim();
   return normalized && normalized.length > 0 ? normalized : "-";
@@ -135,7 +124,7 @@ export function PublishLogTable({
   onSyncModeFilterChange,
   emptyText = "当前筛选条件下暂无发布日志。",
   emptyNextStep = "下一步：取消“仅看可重试”或切换 sync_mode 后重试。",
-  tableAriaLabel = "发布日志列表"
+  tableAriaLabel = "发布日志列表",
 }: Props) {
   const retryableId = useId();
   const syncModeId = useId();
@@ -159,7 +148,9 @@ export function PublishLogTable({
   const routeReasonDisplay = formatRouteValue(routeRefItem?.route_reason);
 
   const toggleExpand = (id: string) => {
-    setExpandedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+    setExpandedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
   };
 
   return (
@@ -184,7 +175,9 @@ export function PublishLogTable({
             发生了什么：分类增长已达上限，内容被路由到兜底分类。下一步：在系统健康确认分类增长上限或补充固定分类后重试发布。
           </small>
         ) : (
-          <small className="hint">发生了什么：当前显示最近一次发布路由结果。下一步：可展开日志行查看单条详情。</small>
+          <small className="hint">
+            发生了什么：当前显示最近一次发布路由结果。下一步：可展开日志行查看单条详情。
+          </small>
         )}
       </article>
 
@@ -203,7 +196,9 @@ export function PublishLogTable({
           <select
             id={syncModeId}
             value={syncModeFilter}
-            onChange={(event) => onSyncModeFilterChange(event.target.value as PublishSyncModeFilter)}
+            onChange={(event) =>
+              onSyncModeFilterChange(event.target.value as PublishSyncModeFilter)
+            }
           >
             <option value="all">all</option>
             <option value="page_tree">page_tree</option>
@@ -257,7 +252,9 @@ export function PublishLogTable({
                       </td>
                       <td>{formatTime(item.created_at)}</td>
                       <td>
-                        <span className={`tag ${stateTone(item.state)}`}>{formatState(item.state)}</span>
+                        <span className={`tag ${stateTone(item.state)}`}>
+                          {formatState(item.state)}
+                        </span>
                       </td>
                       <td>{item.success_count}</td>
                       <td>{item.fail_count}</td>
@@ -306,7 +303,11 @@ export function PublishLogTable({
                             </div>
                             <div className="kv-row">
                               <span>封面与图片数量</span>
-                              <code>{previewImages.length > 0 ? `已返回 ${previewImages.length} 张` : "-"}</code>
+                              <code>
+                                {previewImages.length > 0
+                                  ? `已返回 ${previewImages.length} 张`
+                                  : "-"}
+                              </code>
                             </div>
                             <div className="kv-row">
                               <span>质量判定</span>
@@ -333,7 +334,8 @@ export function PublishLogTable({
                             {(item.state === "failed" || item.state === "partial") && (
                               <div className="state-panel warning">
                                 <div>
-                                  发生了什么：本次发布存在失败记录（错误码：{item.error_code ?? "-"}，可重试：
+                                  发生了什么：本次发布存在失败记录（错误码：{item.error_code ?? "-"}
+                                  ，可重试：
                                   {formatRetryable(item.retryable)}）。
                                 </div>
                                 <small>{summarizeFailureAction(item)}</small>

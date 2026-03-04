@@ -1,8 +1,4 @@
-import type {
-  BackendReviewItem,
-  ReviewItem,
-  ReviewTab
-} from "../types/contracts";
+import type { BackendReviewItem, ReviewItem, ReviewTab } from "../types/contracts";
 
 function mapStateToTab(state: string): ReviewTab {
   const normalized = state.toLowerCase();
@@ -139,6 +135,6 @@ export function toReviewItem(item: BackendReviewItem): ReviewItem {
     tags,
     coverUrl,
     imageUrls,
-    tab: mapStateToTab(item.state)
+    tab: mapStateToTab(item.state),
   };
 }

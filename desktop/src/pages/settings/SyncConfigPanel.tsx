@@ -23,7 +23,7 @@ export function SyncConfigPanel({
   databaseIdMissing,
   tokenMissing,
   actionBusy,
-  onRefresh
+  onRefresh,
 }: Props) {
   return (
     <article className="panel-card">
@@ -35,8 +35,8 @@ export function SyncConfigPanel({
         empty={!syncConfig}
         loadingText="同步配置加载中..."
         emptyText="暂未获取到同步配置快照。"
-        errorNextStep="下一步：点击"刷新配置状态"；若持续失败，请确认后端配置快照 IPC 已部署。"
-        emptyNextStep="下一步：点击"刷新配置状态"，确认模式与配置项后再执行同步。"
+        errorNextStep="下一步：点击「刷新配置状态」；若持续失败，请确认后端配置快照 IPC 已部署。"
+        emptyNextStep="下一步：点击「刷新配置状态」，确认模式与配置项后再执行同步。"
         onRetry={onRefresh}
         retryLabel="刷新配置状态"
       >
@@ -58,7 +58,9 @@ export function SyncConfigPanel({
         </div>
         <div className="kv-row">
           <span>timezone</span>
-          <code>{syncConfig?.timezone && syncConfig.timezone.length > 0 ? syncConfig.timezone : "-"}</code>
+          <code>
+            {syncConfig?.timezone && syncConfig.timezone.length > 0 ? syncConfig.timezone : "-"}
+          </code>
         </div>
         <div className="kv-row">
           <span>category growth limit</span>
@@ -73,18 +75,20 @@ export function SyncConfigPanel({
         {syncConfig?.source === "ipc" && syncModeUnknown && (
           <div className="state-panel warning" role="status" aria-live="polite">
             当前同步模式配置无效，手动同步会被拦截。
-            <small>下一步：将 NOTION_SYNC_MODE 设为 page_tree 或 database，再点击"刷新配置状态"。</small>
+            <small>
+              下一步：将 NOTION_SYNC_MODE 设为 page_tree 或 database，再点击「刷新配置状态」。
+            </small>
           </div>
         )}
         {rootPageMissing && (
           <div className="state-panel warning" role="status" aria-live="polite">
-            当前为页面树模式，但未配置"同步起始页面"，本次同步会被拦截。
+            当前为页面树模式，但未配置「同步起始页面」，本次同步会被拦截。
             <small>下一步：在环境配置中补齐 root page id，再回到此页重试。</small>
           </div>
         )}
         {databaseIdMissing && (
           <div className="state-panel warning" role="status" aria-live="polite">
-            当前为数据库模式，但未配置"目标数据库"，本次同步会被拦截。
+            当前为数据库模式，但未配置「目标数据库」，本次同步会被拦截。
             <small>下一步：在环境配置中补齐 database id，再回到此页重试。</small>
           </div>
         )}

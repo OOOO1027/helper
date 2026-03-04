@@ -33,7 +33,7 @@ function useNotices() {
       const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
       setItems((prev) => [
         { ...item, id },
-        ...prev.filter((n) => n.message !== item.message).slice(0, 3)
+        ...prev.filter((n) => n.message !== item.message).slice(0, 3),
       ]);
       const timeoutMs = item.level === "error" ? 8000 : 4800;
       timerRef.current[id] = window.setTimeout(() => {
@@ -57,7 +57,7 @@ export default function App() {
   const [active, setActive] = useState<NavKey>("inbox");
   const [reviewEntry, setReviewEntry] = useState<{ tab: ReviewTab; token: number }>({
     tab: "pending",
-    token: 0
+    token: 0,
   });
   const notices = useNotices();
 
@@ -66,7 +66,7 @@ export default function App() {
       { key: "inbox" as const, label: "收件箱", hint: "小红书增量" },
       { key: "review" as const, label: "审核", hint: "低置信决策" },
       { key: "publish" as const, label: "发布中心", hint: "Notion即时发布" },
-      { key: "health" as const, label: "系统健康", hint: "状态与回放" }
+      { key: "health" as const, label: "系统健康", hint: "状态与回放" },
     ],
     []
   );

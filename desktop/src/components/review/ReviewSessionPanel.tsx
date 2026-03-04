@@ -21,7 +21,7 @@ export function ReviewSessionPanel({
   targetReached,
   sessionLogs,
   lastFailures,
-  onClearFailures
+  onClearFailures,
 }: Props) {
   return (
     <>

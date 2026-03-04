@@ -2,8 +2,8 @@ use chrono::{Duration, Local};
 use rusqlite::{params, Connection};
 use serde_json::json;
 
-use crate::{BackendError, Result};
 use super::{ModelUsageRecord, PendingSyncRow, StructuredContent};
+use crate::{BackendError, Result};
 
 pub(super) fn persist_structured_snapshot(
     conn: &Connection,

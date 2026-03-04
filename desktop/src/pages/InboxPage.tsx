@@ -38,32 +38,29 @@ export function InboxPage({ onNotify, onOpenReview, onOpenPublish }: Props) {
   const [feedback, setFeedback] = useState<ActionFeedback | null>(null);
   const mountedRef = useRef(true);
 
-  const loadInsight = useCallback(
-    async (silent = false) => {
-      if (!silent) {
-        setLoading(true);
+  const loadInsight = useCallback(async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    }
+    try {
+      const data = await getCollectionInsight();
+      if (!mountedRef.current) {
+        return;
       }
-      try {
-        const data = await getCollectionInsight();
-        if (!mountedRef.current) {
-          return;
-        }
-        setInsight(data);
-        setError(null);
-      } catch (e) {
-        if (!mountedRef.current) {
-          return;
-        }
-        const message = toUserMessage(e, "收件箱数据加载失败");
-        setError(`收件箱数据加载失败：${message}`);
-      } finally {
-        if (mountedRef.current) {
-          setLoading(false);
-        }
+      setInsight(data);
+      setError(null);
+    } catch (e) {
+      if (!mountedRef.current) {
+        return;
       }
-    },
-    []
-  );
+      const message = toUserMessage(e, "收件箱数据加载失败");
+      setError(`收件箱数据加载失败：${message}`);
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -83,7 +80,7 @@ export function InboxPage({ onNotify, onOpenReview, onOpenPublish }: Props) {
       setFeedback({
         level: "success",
         message,
-        nextStep: "下一步：进入“审核”处理低置信内容，系统会即时发布通过项。"
+        nextStep: "下一步：进入“审核”处理低置信内容，系统会即时发布通过项。",
       });
       onNotify({ level: "success", message });
       await loadInsight(true);
@@ -92,7 +89,7 @@ export function InboxPage({ onNotify, onOpenReview, onOpenPublish }: Props) {
       setFeedback({
         level: "error",
         message,
-        nextStep: "下一步：检查小红书登录态与抓取权限后重试。"
+        nextStep: "下一步：检查小红书登录态与抓取权限后重试。",
       });
       onNotify({ level: "error", message });
     } finally {
@@ -196,7 +193,8 @@ export function InboxPage({ onNotify, onOpenReview, onOpenPublish }: Props) {
             <article className="panel-card">
               <h3>来源分布</h3>
               <p className="hint">
-                {insight.sources.map((item) => `${item.source}:${item.count}`).join(" / ") || "暂无数据"}
+                {insight.sources.map((item) => `${item.source}:${item.count}`).join(" / ") ||
+                  "暂无数据"}
               </p>
             </article>
 

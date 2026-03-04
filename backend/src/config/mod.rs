@@ -16,11 +16,9 @@ use crate::{BackendError, Result};
 // ── Raw DB readers ────────────────────────────────────────────────────────────
 
 pub fn read_app_config_string(conn: &Connection, key: &str) -> Result<Option<String>> {
-    conn.query_row(
-        "SELECT value FROM app_config WHERE key = ?1",
-        [key],
-        |r| r.get::<_, String>(0),
-    )
+    conn.query_row("SELECT value FROM app_config WHERE key = ?1", [key], |r| {
+        r.get::<_, String>(0)
+    })
     .optional()
     .map_err(BackendError::Storage)
 }
