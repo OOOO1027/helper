@@ -1,0 +1,28 @@
+[package]
+name = "helper-desktop"
+version = "0.1.0"
+description = "Helper desktop app"
+authors = ["helper"]
+edition = "2021"
+
+[lib]
+name = "helper_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+helper-backend = { path = "../../backend", features = ["tauri-integration"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tracing = "0.1"
+
+[dev-dependencies]
+tauri = { version = "2", features = ["test"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

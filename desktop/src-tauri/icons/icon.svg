@@ -1,0 +1,57 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tile" x1="102" y1="86" x2="922" y2="944" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FBFDFF"/>
+      <stop offset="0.58" stop-color="#EEF3F8"/>
+      <stop offset="1" stop-color="#E4EAF1"/>
+    </linearGradient>
+    <linearGradient id="loop" x1="246" y1="394" x2="786" y2="734" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2E8EFF"/>
+      <stop offset="0.52" stop-color="#59A8FF"/>
+      <stop offset="1" stop-color="#1FB687"/>
+    </linearGradient>
+    <linearGradient id="dotBlue" x1="286" y1="538" x2="398" y2="650" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4FA4FF"/>
+      <stop offset="1" stop-color="#2D79E5"/>
+    </linearGradient>
+    <linearGradient id="dotAmber" x1="456" y1="292" x2="568" y2="404" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFC872"/>
+      <stop offset="1" stop-color="#EFA338"/>
+    </linearGradient>
+    <linearGradient id="dotGreen" x1="626" y1="538" x2="738" y2="650" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4ED5AE"/>
+      <stop offset="1" stop-color="#1AAA7F"/>
+    </linearGradient>
+    <filter id="tileShadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#101828" flood-opacity="0.16"/>
+    </filter>
+    <filter id="softLift" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#162940" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect x="78" y="78" width="868" height="868" rx="194" fill="url(#tile)" filter="url(#tileShadow)"/>
+  <rect x="78" y="78" width="868" height="868" rx="194" fill="none" stroke="#FFFFFF" stroke-opacity="0.78" stroke-width="3"/>
+  <rect x="146" y="126" width="732" height="246" rx="114" fill="#FFFFFF" fill-opacity="0.34"/>
+
+  <path
+    d="M268 582 C268 458 365 364 500 360 C656 355 756 456 756 586 C756 712 657 808 512 808 C363 808 268 710 268 582 Z"
+    fill="none"
+    stroke="url(#loop)"
+    stroke-width="56"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#softLift)"
+  />
+
+  <circle cx="342" cy="592" r="62" fill="url(#dotBlue)"/>
+  <circle cx="512" cy="360" r="62" fill="url(#dotAmber)"/>
+  <circle cx="682" cy="592" r="62" fill="url(#dotGreen)"/>
+
+  <circle cx="342" cy="592" r="18" fill="#FFFFFF"/>
+  <circle cx="512" cy="360" r="18" fill="#FFFFFF"/>
+  <circle cx="682" cy="592" r="18" fill="#FFFFFF"/>
+
+  <path d="M454 708 H570" fill="none" stroke="#C7D4E5" stroke-width="24" stroke-linecap="round"/>
+  <path d="M478 760 H546" fill="none" stroke="#D8E2EE" stroke-width="18" stroke-linecap="round"/>
+</svg>

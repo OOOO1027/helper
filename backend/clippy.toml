@@ -1,0 +1,4 @@
+# Clippy configuration — enforced in CI via `cargo clippy -- -D warnings`
+
+# Avoid overly pedantic style changes for now; tighten as the codebase matures.
+cognitive-complexity-threshold = 30

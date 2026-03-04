@@ -1,0 +1,23 @@
+.DS_Store
+
+# Node / frontend artifacts
+node_modules/
+desktop/node_modules/
+desktop/dist/
+
+# Rust artifacts
+target/
+backend/target/
+desktop/src-tauri/target/
+
+# Local runtime data
+data/*.db
+data/*.sqlite*
+backend/data/*.db
+backend/data/*.sqlite*
+*.log
+
+# Environment and secrets
+.env
+.env.*
+!.env.example

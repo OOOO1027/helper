@@ -1,0 +1,229 @@
+{
+  "api_envelope": {
+    "ok": true,
+    "request_id": "uuid",
+    "data": {},
+    "error": {
+      "code": "IPC-6001",
+      "message": "validation failed",
+      "retryable": false
+    }
+  },
+  "commands": {
+    "import_wechat_and_persist": {
+      "request": {
+        "req": {
+          "paths": [
+            "/tmp/wx-20260225-1.txt",
+            "/tmp/wx-20260225-2.html",
+            "/tmp/wx-20260225-3.pdf"
+          ]
+        }
+      },
+      "response_data": {
+        "batch_id": "uuid",
+        "total": 3,
+        "parsed_ok": 2,
+        "duplicates": 0,
+        "parse_failed": 1,
+        "persisted": 2,
+        "persist_failed": 0
+      },
+      "error_examples": [
+        {
+          "code": "IPC-6001",
+          "message": "HELPER_DB_PATH is required",
+          "retryable": false
+        },
+        {
+          "code": "IPC-6001",
+          "message": "HELPER_DB_KEY is required",
+          "retryable": false
+        }
+      ]
+    },
+    "run_pipeline_persist": {
+      "request": {
+        "source": "wechat",
+        "source_url": "https://example.com/post?id=1",
+        "published_at": "2026-02-25T21:30:00+08:00",
+        "content_raw": "Rust Tauri backend workflow"
+      },
+      "response_data": {
+        "source_item_id": "src_xxx",
+        "normalized_item_id": "norm_xxx",
+        "analysis_result_id": "ana_xxx",
+        "review_queued": false,
+        "sync_record_id": "sync_xxx",
+        "notion_action": "create"
+      },
+      "error_examples": [
+        {
+          "code": "IPC-6001",
+          "message": "content_raw must not be empty",
+          "retryable": false
+        }
+      ]
+    },
+    "run_notion_sync_once": {
+      "request": {
+        "req": {
+          "limit": 50
+        }
+      },
+      "response_data": {
+        "scanned": 12,
+        "attempted": 12,
+        "succeeded": 10,
+        "failed": 2,
+        "requeued": 1,
+        "dead_lettered": 1
+      },
+      "error_examples": [
+        {
+          "code": "IPC-6001",
+          "message": "NOTION_TOKEN is required",
+          "retryable": false
+        },
+        {
+          "code": "IPC-6001",
+          "message": "NOTION_DATABASE_ID is required",
+          "retryable": false
+        }
+      ]
+    },
+    "retry_dead_letters": {
+      "request": {
+        "req": {
+          "ids": ["dlq_sync_xxx", "dlq_pipeline_xxx"]
+        }
+      },
+      "response_data": {
+        "requested": 2,
+        "requeued": 2,
+        "ignored": 0
+      },
+      "error_examples": [
+        {
+          "code": "IPC-6001",
+          "message": "HELPER_DB_PATH is required",
+          "retryable": false
+        }
+      ]
+    },
+    "get_sync_logs": {
+      "request": {
+        "range": {
+          "from": "2026-02-01 00:00:00",
+          "to": "2026-02-28 23:59:59"
+        },
+        "page": {
+          "page": 1,
+          "page_size": 20
+        }
+      },
+      "response_data": {
+        "items": [
+          {
+            "id": "sync_xxx",
+            "state": "failed",
+            "error_code": "MOD-3002",
+            "created_at": "2026-02-26 00:01:00"
+          },
+          {
+            "id": "jr_xxx",
+            "state": "partial",
+            "error_code": "INT-9000",
+            "created_at": "2026-02-26 00:02:00"
+          }
+        ],
+        "page": 1,
+        "page_size": 20,
+        "total": 2
+      },
+      "error_examples": [
+        {
+          "code": "IPC-6001",
+          "message": "HELPER_DB_PATH is required",
+          "retryable": false
+        }
+      ]
+    },
+    "get_sync_daily_stats": {
+      "request": {
+        "req": {
+          "range": {
+            "from": "2026-02-01 00:00:00",
+            "to": "2026-02-28 23:59:59"
+          },
+          "job_type": "notion_sync_once",
+          "status": "failed",
+          "page": {
+            "page": 1,
+            "page_size": 20
+          }
+        }
+      },
+      "response_data": {
+        "items": [
+          {
+            "day": "2026-02-26",
+            "job_type": "notion_sync_once",
+            "run_count": 3,
+            "success_runs": 2,
+            "partial_runs": 1,
+            "failed_runs": 0,
+            "success_rate": 0.6667,
+            "avg_success_count": 1.3333,
+            "avg_fail_count": 0.3333
+          },
+          {
+            "day": "2026-02-26",
+            "job_type": "notion_smoke",
+            "run_count": 1,
+            "success_runs": 0,
+            "partial_runs": 0,
+            "failed_runs": 1,
+            "success_rate": 0.0,
+            "avg_success_count": 0.0,
+            "avg_fail_count": 1.0
+          }
+        ],
+        "page": 1,
+        "page_size": 20,
+        "total": 2
+      },
+      "error_examples": [
+        {
+          "code": "IPC-6001",
+          "message": "HELPER_DB_PATH is required",
+          "retryable": false
+        },
+        {
+          "code": "IPC-6001",
+          "message": "status must be one of started|success|failed|partial|skipped, got pending",
+          "retryable": false
+        },
+        {
+          "code": "IPC-6001",
+          "message": "range.from and range.to must not be empty",
+          "retryable": false
+        }
+      ]
+    },
+    "get_local_tool_status": {
+      "request": {},
+      "response_data": {
+        "textutil": true,
+        "pdftotext": false
+      },
+      "error_examples": [
+        {
+          "code": "INT-9000",
+          "message": "internal failed: local tool detection unavailable",
+          "retryable": true
+        }
+      ]
+    }
+  }
+}
