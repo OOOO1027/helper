@@ -151,7 +151,7 @@
 #### F-P1-02: 拆分大型页面组件
 
 **现状问题**  
-`ReviewQueuePage.tsx` 约 800+ 行，包含了数据加载、过滤、排序、批量操作、抽屉显示等全部逻辑。  
+`ReviewQueuePage.tsx` 约 700 行，包含了数据加载、过滤、排序、批量操作、抽屉显示等全部逻辑。  
 `PublishCenterPage.tsx` 和 `InboxPage.tsx` 也存在类似问题。
 
 **改进方案**  
@@ -357,8 +357,8 @@ IPC 响应仅依赖 TypeScript 编译时类型检查。
 #### F-P2-04: 优化 useMemo / useCallback 使用
 
 **现状问题**  
-- `App.tsx` 中 `navItems` 用了 `useMemo`，但事件处理器未用 `useCallback`
-- 子组件每次渲染都接收新的函数引用，触发不必要的重渲染
+- `App.tsx` 中 `navItems` 用了 `useMemo`，`useNotices` hook 中使用了 `useCallback`，但页面内事件处理器未统一 memo 化
+- 子组件每次渲染都接收新的函数引用（如 `onNotify`、`onOpenReview` 等内联箭头函数），触发不必要的重渲染
 
 **改进方案**  
 1. 为所有传递给子组件的回调使用 `useCallback`。
